@@ -1,0 +1,1229 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#39263f">
+  <meta name="description" content="PinchaGest: gestión simple para el taller Las Pilchas, en Valdivia.">
+  <title>PinchaGest · Las Pilchas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --color-ciruela: #39263F;
+  --color-coral: #F06B50;
+  --color-mostaza: #F0C85E;
+  --color-salvia: #D7E6DC;
+  --color-crema: #F7F2EA;
+  --ink: #29222d;
+  --muted: #847b85;
+  --line: #e9e3dc;
+  --white: #fff;
+  --lavender: #e9ddeb;
+  --peach: #f7ded5;
+  --shadow: 0 12px 32px rgba(57, 38, 63, .07);
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  font-family: "DM Sans", system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--color-crema);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--color-crema); }
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid rgba(240, 107, 80, .38); outline-offset: 2px;
+}
+.app-shell { display: flex; min-height: 100vh; padding: 22px; gap: 18px; max-width: 1640px; margin: auto; }
+.sidebar {
+  position: sticky; top: 22px; width: 224px; height: calc(100vh - 44px); min-height: 660px;
+  flex: 0 0 224px; display: flex; flex-direction: column; padding: 25px 15px 15px;
+  overflow-y: auto; background: var(--color-ciruela); color: #fff; border-radius: 24px; box-shadow: 0 12px 28px rgba(37, 22, 41, .15);
+}
+.brand { display: flex; flex-direction: column; padding: 0 12px; font: 800 17px/1.05 Manrope, sans-serif; letter-spacing: -.04em; }
+.brand strong, .mobile-brand strong { color: var(--color-mostaza); }
+.sidebar-rule { height: 1px; background: rgba(255,255,255,.1); margin: 23px 4px 14px; }
+.nav-list { display: grid; gap: 5px; }
+.nav-link { min-height: 42px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border-radius: 10px; color: rgba(255,255,255,.76); font-size: 13px; font-weight: 600; transition: background .2s var(--ease), color .2s var(--ease), transform .2s var(--ease); }
+.nav-link:hover { background: rgba(255,255,255,.1); color: #fff; transform: translateX(2px); }
+.nav-link.active { background: #593e61; color: #fff; }
+.nav-icon { display: inline-grid; place-items: center; width: 16px; color: var(--color-mostaza); font-size: 15px; }
+.nav-caption { padding: 23px 12px 9px; color: rgba(255,255,255,.45); font-size: 9px; font-weight: 800; letter-spacing: .12em; }
+.sidebar-spacer { flex: 1; min-height: 18px; }
+.sidebar-tools { display: grid; gap: 2px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,.1); }
+.utility-link { border: 0; color: rgba(255,255,255,.64); background: transparent; display: flex; align-items: center; gap: 10px; text-align: left; padding: 8px 11px; font-size: 11px; border-radius: 8px; }
+.utility-link:hover { color: #fff; background: rgba(255,255,255,.08); }
+.sync-note { display: flex; align-items: flex-start; gap: 9px; padding: 13px 10px 3px; }
+.sync-note strong, .sync-note small { display: block; }
+.sync-note strong { color: #fff; font-size: 10px; }
+.sync-note small { margin-top: 4px; color: rgba(255,255,255,.53); font-size: 9px; line-height: 1.4; }
+.sync-indicator { width: 8px; height: 8px; flex: 0 0 8px; margin-top: 2px; border-radius: 50%; background: #8bc7a3; box-shadow: 0 0 0 4px rgba(139,199,163,.12); animation: sync-pulse 2.8s ease-in-out infinite; }
+.logout-link { width: 100%; margin-top: 4px; }
+@keyframes sync-pulse { 50% { box-shadow: 0 0 0 7px rgba(139,199,163,0); } }
+.profile { display: flex; align-items: center; gap: 10px; padding: 14px 5px 0; font-size: 12px; }
+.profile strong, .profile small { display: block; }
+.profile small { margin-top: 3px; color: rgba(255,255,255,.54); font-size: 10px; }
+.avatar { width: 31px; height: 31px; display: grid; place-items: center; background: var(--color-coral); border-radius: 50%; font-weight: 800; }
+.profile-dot { width: 7px; height: 7px; margin-left: auto; background: #8bc7a3; border-radius: 50%; }
+.main-area { flex: 1; min-width: 0; }
+.view-root { width: 100%; max-width: 1180px; margin: 0 auto; animation: view-in .32s var(--ease) both; }
+@keyframes view-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin: 13px 4px 25px; }
+.eyebrow { color: #897a8d; font-size: 9px; font-weight: 800; letter-spacing: .13em; }
+h1, h2, h3, p { margin-top: 0; }
+h1, h2, h3 { font-family: Manrope, "DM Sans", sans-serif; color: var(--color-ciruela); }
+h1 { margin: 8px 0 5px; font-size: clamp(24px, 3vw, 31px); letter-spacing: -.055em; line-height: 1.15; }
+.page-header p { color: var(--muted); font-size: 13px; margin: 0; }
+.page-actions { display: flex; gap: 9px; align-items: center; }
+.status-pill, .badge { display: inline-flex; align-items: center; gap: 7px; border: 0; border-radius: 999px; padding: 9px 13px; font-size: 9px; line-height: 1; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.status-pill { position: relative; background: var(--color-salvia); color: #385448; cursor: pointer; box-shadow: inset 0 2px 4px rgba(47,77,59,.14), 0 3px 0 #afc8b7; transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
+.status-pill:hover { transform: translateY(-2px); }
+.status-pill:active { transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(47,77,59,.14), 0 1px 0 #afc8b7; }
+.status-pill:after { content: ""; width: 15px; height: 15px; border-radius: 50%; background: linear-gradient(145deg, #fff, #d6d0d5); box-shadow: 0 2px 3px rgba(37,22,41,.24), inset 0 1px 1px #fff; }
+.status-pill.closed { background: #eee7eb; color: #786b79; box-shadow: inset 0 2px 4px rgba(47,35,48,.12), 0 3px 0 #d0c4d2; }
+.status-pill.closed:after { background: linear-gradient(145deg, #fff, #d5cbd7); }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: #67a77e; }
+.status-pill.closed .status-dot { background: #a99daa; }
+.button { position: relative; border: 2px solid var(--color-ciruela); border-radius: 9px; padding: 10px 14px; min-height: 40px; font-size: 12px; font-weight: 800; transition: transform .2s var(--ease), box-shadow .2s var(--ease), filter .2s var(--ease), background-position .4s var(--ease); }
+.button:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(57,38,63,.18); }
+.button:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(57,38,63,.2); }
+.button-primary { background: linear-gradient(110deg, var(--color-coral) 0%, var(--color-coral) 42%, #f58b70 50%, var(--color-coral) 58%, var(--color-coral) 100%); background-size: 220% 100%; color: #fff; box-shadow: 0 4px 0 #9d4535; }
+.button-primary:hover { background-position: 100% 0; box-shadow: 0 6px 0 #9d4535; }
+.button-dark { background: var(--color-ciruela); color: #fff; box-shadow: 0 4px 0 #241729; }
+.button-soft { color: var(--color-ciruela); background: var(--color-crema); border: 1px solid var(--line); }
+.button-outline { color: #fff; background: transparent; border: 2px solid rgba(255,255,255,.58); box-shadow: 0 4px 0 rgba(17,10,20,.4); }
+.button-small { min-height: 32px; padding: 7px 10px; border-radius: 8px; font-size: 10px; }
+.icon-button { border: 0; width: 38px; height: 38px; background: #fff; color: var(--color-ciruela); border-radius: 11px; box-shadow: 0 3px 12px rgba(57,38,63,.06); }
+.kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+.kpi-card { min-height: 112px; padding: 18px 20px; border: 1px solid rgba(57,38,63,.07); border-radius: 19px; box-shadow: inset 3px 3px 8px rgba(255,255,255,.65), inset -4px -5px 9px rgba(57,38,63,.05), 5px 6px 0 rgba(57,38,63,.1); transition: transform .28s var(--ease), box-shadow .28s var(--ease); animation: card-pop .65s var(--ease) both; }
+.kpi-card:nth-child(2) { animation-delay: .08s; }
+.kpi-card:nth-child(3) { animation-delay: .16s; }
+.kpi-card:hover { transform: translateY(-4px) rotate(-.25deg); box-shadow: inset 3px 3px 8px rgba(255,255,255,.75), inset -4px -5px 9px rgba(57,38,63,.04), 8px 9px 0 rgba(57,38,63,.12); }
+@keyframes card-pop { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.kpi-card.cash { background: #f7edc9; }
+.kpi-card.orders-kpi { background: var(--lavender); }
+.kpi-card.stock-kpi { background: var(--peach); }
+.kpi-label { font-size: 9px; font-weight: 800; color: #756d72; letter-spacing: .1em; }
+.kpi-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 12px; }
+.kpi-value { color: var(--color-ciruela); font: 800 25px/1 Manrope, sans-serif; letter-spacing: -.04em; }
+.kpi-note { color: #847a7d; font-size: 9px; }
+.dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(250px, .8fr); gap: 16px; align-items: stretch; }
+.panel { background: rgba(255,255,255,.82); border: 1px solid rgba(57,38,63,.07); border-radius: 19px; padding: 19px; box-shadow: inset 2px 2px 7px rgba(255,255,255,.9), inset -3px -4px 8px rgba(57,38,63,.035), 5px 6px 0 rgba(57,38,63,.08); }
+.panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.panel-heading h2 { margin: 0; font-size: 12px; letter-spacing: .075em; }
+.text-link { border: 0; background: transparent; color: #8a708d; font-size: 10px; font-weight: 800; }
+.text-link:hover { color: var(--color-coral); }
+.recent-list { display: grid; gap: 0; }
+.recent-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 14px; min-height: 45px; border-top: 1px solid #eee9e4; }
+.recent-person { overflow: hidden; }
+.recent-person strong { display: block; color: var(--color-ciruela); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-person small { color: var(--muted); display: block; margin-top: 3px; font-size: 9px; }
+.badge { justify-content: center; padding: 8px 10px; font-size: 8px; letter-spacing: .02em; text-transform: none; cursor: pointer; white-space: nowrap; }
+.badge.ingresada { background: var(--lavender); color: #644c6d; }
+.badge.proceso { background: var(--color-mostaza); color: #604d1b; }
+.badge.retirar { background: var(--color-salvia); color: #385448; }
+.badge.entregada { background: #e9e6e9; color: #746b75; }
+.quick-panel { background: var(--color-ciruela); color: white; border-radius: 17px; padding: 20px; box-shadow: 0 5px 14px rgba(57,38,63,.11); display: flex; flex-direction: column; }
+.quick-panel h2 { margin: 0 0 19px; color: var(--color-mostaza); font-size: 10px; letter-spacing: .1em; }
+.quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
+.quick-actions .button { min-height: 50px; }
+.quick-footnote { color: rgba(255,255,255,.57); margin: 15px 0 0; font-size: 10px; line-height: 1.5; }
+.section-spacer { margin-top: 17px; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-bottom: 14px; }
+.field-control { min-height: 39px; padding: 0 11px; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 9px; font-size: 11px; }
+.search-control { flex: 1 1 210px; }
+.toolbar .field-control { max-width: 230px; }
+.table-wrap { width: 100%; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 11px; }
+th { padding: 10px 9px; color: #918792; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 12px 9px; border-bottom: 1px solid #f0ece8; vertical-align: middle; }
+tbody tr:last-child td { border-bottom: 0; }
+.cell-strong { display: block; color: var(--color-ciruela); font-weight: 800; }
+.cell-muted { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; }
+.table-actions { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.inline-select { max-width: 145px; min-height: 31px; border: 1px solid var(--line); border-radius: 8px; padding: 0 6px; background: #fff; color: var(--color-ciruela); font-size: 9px; }
+.empty-state { padding: 32px 16px; color: var(--muted); text-align: center; font-size: 12px; }
+.summary-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; margin-bottom: 15px; }
+.summary-tile { padding: 14px; border-radius: 13px; background: #fff; }
+.summary-tile span { display: block; color: var(--muted); font-size: 9px; }
+.summary-tile strong { display: block; margin-top: 7px; color: var(--color-ciruela); font: 800 18px Manrope, sans-serif; }
+.stock-grid, .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
+.stock-card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.stock-card.low { border-color: #efb5a7; background: #fff9f7; }
+.stock-card h3 { margin: 0 0 8px; font-size: 13px; }
+.stock-card p { margin: 0; color: var(--muted); font-size: 10px; }
+.stock-count { display: flex; align-items: baseline; justify-content: space-between; margin: 17px 0 13px; }
+.stock-count strong { font: 800 23px Manrope, sans-serif; color: var(--color-ciruela); }
+.stock-count small { color: var(--muted); font-size: 9px; }
+.stock-card.low .stock-count strong { color: var(--color-coral); }
+.hero { position: relative; overflow: hidden; display: grid; grid-template-columns: 1.15fr .85fr; gap: 32px; align-items: center; padding: clamp(28px, 5vw, 58px); min-height: 340px; border: 3px solid #25182a; border-radius: 22px; color: #fff; background: linear-gradient(140deg, #39263f, #452e4d 60%, #302036); box-shadow: 8px 8px 0 rgba(57,38,63,.18); }
+.hero:after { content: ""; position: absolute; width: 310px; height: 310px; right: -80px; bottom: -180px; border: 1px solid rgba(240,200,94,.24); border-radius: 50%; background: rgba(240,200,94,.12); box-shadow: 0 0 0 24px rgba(240,200,94,.035), 0 0 0 48px rgba(240,200,94,.025); animation: orbit-drift 9s ease-in-out infinite alternate; }
+@keyframes orbit-drift { to { transform: translate(-24px,-22px) scale(1.08); } }
+.hero h1 { max-width: 600px; margin: 13px 0; color: #fff; font-size: clamp(30px, 4vw, 48px); line-height: 1.08; letter-spacing: -.06em; }
+.hero p { max-width: 490px; color: rgba(255,255,255,.7); font-size: 14px; line-height: 1.7; }
+.hero .eyebrow { color: var(--color-mostaza); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 23px; }
+.hero-preview { position: relative; z-index: 1; padding: 20px; border: 2px solid var(--color-ciruela); border-radius: 19px; background: var(--color-crema); color: var(--ink); box-shadow: inset 3px 3px 8px #fff, 7px 8px 0 rgba(18,9,21,.34); transform: rotate(1deg); animation: preview-hover 5s ease-in-out infinite alternate; }
+@keyframes preview-hover { to { transform: rotate(-1deg) translateY(-7px); } }
+.preview-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 17px; }
+.preview-logo { color: var(--color-ciruela); font: 800 11px Manrope, sans-serif; }
+.preview-lines { display: grid; gap: 9px; }
+.preview-line { display: flex; justify-content: space-between; align-items: center; padding: 11px; border-radius: 9px; background: #fff; font-size: 10px; }
+.feature-section { margin: 28px 4px; }
+.feature-section h2 { margin-bottom: 14px; font-size: 20px; letter-spacing: -.04em; }
+.feature-card { background: rgba(255,255,255,.86); border-radius: 17px; padding: 17px; border: 1px solid rgba(57,38,63,.07); box-shadow: inset 2px 2px 7px #fff, 4px 5px 0 rgba(57,38,63,.08); transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+.feature-card:hover { transform: translateY(-4px) rotate(.3deg); box-shadow: inset 2px 2px 7px #fff, 7px 8px 0 rgba(57,38,63,.12); }
+.feature-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; color: var(--color-ciruela); background: var(--color-mostaza); font-weight: 800; }
+.feature-card h3 { margin: 12px 0 6px; font-size: 13px; }
+.feature-card p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+.portal-card { max-width: 690px; margin: 40px auto; }
+.portal-card .panel-heading { margin-bottom: 8px; }
+.portal-intro { color: var(--muted); font-size: 12px; line-height: 1.6; }
+.portal-form { display: flex; gap: 9px; margin: 20px 0; }
+.portal-form input { flex: 1; min-width: 0; }
+.portal-result { border-top: 1px solid var(--line); padding-top: 18px; animation: view-in .25s var(--ease) both; }
+.progress-track { height: 7px; margin: 14px 0 6px; overflow: hidden; border-radius: 99px; background: #eee9e8; }
+.progress-fill { height: 100%; background: var(--color-coral); border-radius: inherit; transition: width .3s var(--ease); }
+.progress-labels { display: flex; justify-content: space-between; color: var(--muted); font-size: 8px; }
+.portal-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.detail-tile { background: var(--color-crema); padding: 12px; border-radius: 10px; }
+.detail-tile small { display: block; color: var(--muted); font-size: 9px; }
+.detail-tile strong { display: block; margin-top: 5px; color: var(--color-ciruela); font-size: 11px; }
+.notice { padding: 12px 14px; color: #554959; background: #eee6ef; border-radius: 11px; font-size: 11px; line-height: 1.5; }
+.cash-banner { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px; background: var(--color-ciruela); color: white; border-radius: 15px; margin-bottom: 15px; }
+.cash-banner h2 { margin: 0 0 5px; color: white; font-size: 15px; }
+.cash-banner p { margin: 0; color: rgba(255,255,255,.67); font-size: 10px; }
+.cash-banner strong { color: var(--color-mostaza); font: 800 21px Manrope,sans-serif; }
+.cash-total-label { display: block; margin-bottom: 4px; color: rgba(255,255,255,.58); font-size: 8px; font-weight: 800; letter-spacing: .1em; }
+.cash-summary .summary-tile:last-child { background: #f7edc9; }
+.cash-explainer { margin-bottom: 15px; }
+.cash-difference { font-weight: 700; }
+.drawer-spacer { height: 8px; }
+.scrim, .mobile-bar { display: none; }
+.toast-region { position: fixed; z-index: 30; right: 24px; bottom: 24px; display: grid; gap: 8px; }
+.toast { max-width: min(390px, calc(100vw - 32px)); padding: 13px 16px; color: #315343; background: var(--color-salvia); border-radius: 12px; box-shadow: var(--shadow); font-size: 12px; animation: toast-in .25s var(--ease) both; }
+.toast.error { background: #f8ded7; color: #8b3c2a; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+#modal-root:empty { display: none; }
+.modal-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 18px; background: rgba(31,20,34,.5); backdrop-filter: blur(3px); animation: fade-in .18s ease both; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.modal { width: min(720px, 100%); max-height: min(90vh, 900px); overflow: auto; border-radius: 18px; background: var(--color-crema); box-shadow: 0 26px 80px rgba(20,10,23,.28); animation: modal-in .26s var(--ease) both; }
+@keyframes modal-in { from { opacity: 0; transform: translateY(12px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.modal.narrow { width: min(480px, 100%); }
+.modal-head { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 20px 22px 15px; background: var(--color-crema); border-bottom: 1px solid var(--line); }
+.modal-head h2 { margin: 5px 0 0; font-size: 19px; }
+.modal-body { padding: 19px 22px 22px; }
+.form-section-title { margin: 2px 0 11px; color: var(--color-ciruela); font-size: 11px; font-weight: 800; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-bottom: 17px; }
+.form-field { display: grid; gap: 6px; min-width: 0; }
+.form-field.full { grid-column: 1 / -1; }
+.form-field label { color: #655b66; font-size: 10px; font-weight: 700; }
+.form-field input, .form-field select, .form-field textarea { width: 100%; min-height: 39px; padding: 9px 10px; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 9px; font-size: 11px; }
+.form-field textarea { min-height: 64px; resize: vertical; }
+.form-field input[type="checkbox"] { width: 15px; min-height: 15px; accent-color: var(--color-ciruela); }
+.check-field { display: flex; align-items: flex-start; gap: 8px; padding-top: 7px; }
+.check-field label { line-height: 1.5; }
+.form-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 14px; border-top: 1px solid var(--line); }
+.quick-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.quick-pill { border: 1px solid var(--line); border-radius: 999px; padding: 7px 10px; background: #fff; color: var(--color-ciruela); font-size: 9px; font-weight: 700; }
+.quick-pill:hover { background: var(--color-salvia); }
+.balance-field { padding: 10px; background: #f0e9f1; border-radius: 9px; color: var(--color-ciruela); font-size: 11px; }
+.sale-items { display: grid; gap: 8px; margin: 10px 0 12px; }
+.sale-item { display: grid; grid-template-columns: minmax(0,1fr) 60px 85px 29px; gap: 7px; align-items: end; padding: 10px; background: #fff; border-radius: 10px; }
+.sale-item .form-field label { font-size: 8px; }
+.sale-item .form-field input, .sale-item .form-field select { min-height: 34px; padding: 6px; font-size: 10px; }
+.remove-item { height: 31px; border: 0; color: #a34939; background: #fce9e4; border-radius: 8px; }
+.total-box { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; padding: 14px; color: white; background: var(--color-ciruela); border-radius: 11px; font-size: 11px; }
+.total-box strong { color: var(--color-mostaza); font: 800 19px Manrope,sans-serif; }
+.change-note { color: #55725f; font-size: 10px; }
+.footer-note { margin: 18px 5px 0; text-align: center; color: #928892; font-size: 9px; }
+.auth-stage { display: grid; min-height: min(78vh, 760px); place-items: center; padding: 22px 10px; }
+.auth-card { width: min(440px, 100%); padding: 30px; border: 2px solid var(--color-ciruela); border-radius: 22px; background: #fffdfa; box-shadow: inset 4px 4px 10px #fff, 8px 9px 0 rgba(57,38,63,.14); animation: card-pop .55s var(--ease) both; }
+.auth-brand { display: flex; flex-direction: column; margin-bottom: 24px; color: var(--color-ciruela); font: 800 17px/1.05 Manrope,sans-serif; }
+.auth-brand strong { color: var(--color-coral); }
+.auth-card h1 { margin: 8px 0; }
+.auth-card > p { margin-bottom: 21px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.auth-card form { display: grid; gap: 13px; }
+.auth-card .form-field input { min-height: 47px; font-size: 16px; letter-spacing: .16em; }
+.auth-submit { width: 100%; min-height: 48px; margin-top: 3px; }
+.auth-error { margin: 0; padding: 9px 11px; border-radius: 9px; color: #8b3c2a; background: #f8ded7; font-size: 11px; }
+.auth-notice { display: grid; gap: 4px; margin-top: 20px; padding: 11px; border-radius: 10px; background: var(--color-crema); color: #746977; font-size: 9px; line-height: 1.5; }
+.auth-notice strong { color: var(--color-ciruela); font-size: 10px; }
+
+@media (max-width: 950px) {
+  .app-shell { padding: 0; gap: 0; }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .sidebar { position: fixed; z-index: 12; top: 10px; bottom: 10px; left: 10px; height: auto; min-height: 0; width: min(270px, calc(100vw - 60px)); transform: translateX(calc(-100% - 18px)); transition: transform .28s var(--ease); }
+  body.menu-open .sidebar { transform: translateX(0); }
+  .scrim { display: block; position: fixed; z-index: 11; inset: 0; border: 0; background: rgba(31,20,34,.4); opacity: 0; pointer-events: none; transition: opacity .25s var(--ease); }
+  body.menu-open .scrim { opacity: 1; pointer-events: auto; }
+  .main-area { width: 100%; padding: 0 20px 24px; }
+  .mobile-bar { position: sticky; top: 0; z-index: 8; display: flex; height: 58px; align-items: center; justify-content: space-between; margin: 0 -20px 10px; padding: 0 19px; background: rgba(247,242,234,.93); backdrop-filter: blur(10px); }
+  .mobile-brand { color: var(--color-ciruela); font: 800 12px Manrope,sans-serif; }
+  .mobile-brand strong { margin-left: 2px; }
+  .mobile-status { border: 0; color: #528264; background: transparent; font-size: 19px; }
+  .menu-button { box-shadow: none; background: transparent; font-size: 17px; }
+  .page-header { margin-top: 10px; }
+}
+@media (max-width: 680px) {
+  .main-area { padding: 0 14px 20px; }
+  .mobile-bar { margin-right: -14px; margin-left: -14px; padding: 0 13px; }
+  .page-header { align-items: flex-start; margin: 10px 1px 18px; }
+  .page-actions { flex-direction: column; align-items: flex-end; }
+  .page-actions .button { min-height: 36px; }
+  .kpi-grid { grid-template-columns: 1fr; gap: 10px; }
+  .kpi-card { min-height: 90px; padding: 15px 17px; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .quick-panel { min-height: 155px; }
+  .summary-strip { grid-template-columns: 1fr 1fr; }
+  .summary-tile:last-child { grid-column: 1 / -1; }
+  .cash-summary .summary-tile:last-child { grid-column: 1 / -1; }
+  .stock-grid, .feature-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero { grid-template-columns: 1fr; padding: 27px 22px; gap: 21px; }
+  .hero-preview { transform: none; }
+  .hero h1 { font-size: 34px; }
+  .portal-card { margin: 18px auto; padding: 15px; }
+  .portal-form { flex-direction: column; }
+  .portal-form .button { width: 100%; }
+  .cash-banner { align-items: flex-start; flex-direction: column; }
+  .modal-backdrop { padding: 8px; }
+  .modal { max-height: 95vh; border-radius: 15px; }
+  .modal-head { padding: 16px 16px 12px; }
+  .modal-body { padding: 15px 16px 17px; }
+  .form-grid { grid-template-columns: 1fr; gap: 10px; }
+  .form-field.full { grid-column: auto; }
+  .sale-item { grid-template-columns: minmax(0,1fr) 52px 75px 28px; gap: 5px; }
+  .form-actions .button { flex: 1; }
+  .toast-region { right: 12px; bottom: 12px; }
+}
+@media (max-width: 390px) {
+  .stock-grid, .feature-grid { grid-template-columns: 1fr; }
+  .page-header { gap: 8px; }
+  .status-pill { padding: 8px 9px; font-size: 8px; }
+  .sale-item { grid-template-columns: 1fr 48px 27px; }
+  .sale-item .price-field { grid-column: 1 / 3; }
+  .sale-item .remove-item { grid-column: 3; grid-row: 1; }
+  .portal-details { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+  </style>
+
+</head>
+<body>
+  <div class="app-shell">
+    <button class="scrim" id="scrim" aria-label="Cerrar menú"></button>
+    <aside class="sidebar" id="sidebar" aria-label="Navegación principal">
+      <a class="brand" href="#dashboard" data-view="dashboard" aria-label="PinchaGest, ir al resumen">
+        <span>PINCHA</span><strong>GEST</strong>
+      </a>
+      <div class="sidebar-rule"></div>
+      <nav class="nav-list" id="primary-nav">
+        <a href="#dashboard" data-view="dashboard" class="nav-link active"><span class="nav-icon">⌂</span>Resumen</a>
+        <a href="#cash" data-view="cash" class="nav-link"><span class="nav-icon">$</span>Caja</a>
+        <a href="#sales" data-view="sales" class="nav-link"><span class="nav-icon">▤</span>Ventas</a>
+        <a href="#orders" data-view="orders" class="nav-link"><span class="nav-icon">▣</span>Pedidos</a>
+        <a href="#stock" data-view="stock" class="nav-link"><span class="nav-icon">◈</span>Stock</a>
+        <a href="#clients" data-view="clients" class="nav-link"><span class="nav-icon">♧</span>Clientes</a>
+      </nav>
+      <div class="nav-caption">PARA TUS CLIENTES</div>
+      <nav class="nav-list">
+        <a href="#portal" data-view="portal" class="nav-link"><span class="nav-icon">◎</span>Portal Cliente</a>
+        <a href="#home" data-view="home" class="nav-link"><span class="nav-icon">✳</span>Inicio Landing</a>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-tools">
+        <button type="button" class="utility-link" data-action="export">↗ <span>Guardar copia de seguridad</span></button>
+        <button type="button" class="utility-link" data-action="import">↙ <span>Restaurar copia de seguridad</span></button>
+        <button type="button" class="utility-link" data-action="restore">↻ <span>Restaurar datos demo</span></button>
+        <input id="import-file" type="file" accept="application/json,.json" hidden>
+      </div>
+      <div class="sync-note"><span class="sync-indicator"></span><span><strong>Autoguardado activo</strong><small>Clientes · pedidos · ventas · stock</small></span></div>
+      <div class="profile">
+        <span class="avatar">M</span>
+        <span><strong>Marlén</strong><small>Las Pilchas · Local 8</small></span>
+        <span class="profile-dot" title="Datos guardados en este dispositivo"></span>
+      </div>
+      <button type="button" class="utility-link logout-link" data-action="logout">↪ <span>Cerrar sesión</span></button>
+    </aside>
+
+    <main class="main-area">
+      <header class="mobile-bar">
+        <button class="icon-button menu-button" id="menu-button" aria-label="Abrir menú" aria-expanded="false">☰</button>
+        <a href="#dashboard" data-view="dashboard" class="mobile-brand">PINCHA<strong>GEST</strong></a>
+        <button class="mobile-status" data-action="toggle-cash" aria-label="Cambiar estado de caja">●</button>
+      </header>
+      <div id="view-root" class="view-root" aria-live="polite"></div>
+    </main>
+  </div>
+  <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+  <div id="modal-root"></div>
+  <script>
+(() => {
+  "use strict";
+
+  const STORAGE_KEY = "pinchagest_las_pilchas_v1";
+  const BACKUP_KEY = "pinchagest_las_pilchas_auto_backup_v1";
+  const AUTH_KEY = "pinchagest_las_pilchas_auth_v1";
+  const AUTH_SESSION_KEY = "pinchagest_las_pilchas_unlocked";
+  const SHOP_ADDRESS = "Local 8, Galería Picarte, Valdivia";
+  const ORDER_STATES = ["Ingresada", "En proceso", "Lista para retirar", "Entregada"];
+  const SECTORS = ["Valdivia Urbano", "Niebla", "Corral", "Mancera", "San José", "Otro sector rural"];
+  const FIXES = [
+    { name: "Basta / Dobladillo", price: 3500 },
+    { name: "Cambio de cierre", price: 5000 },
+    { name: "Entalle / Ajuste de cintura", price: 6000 },
+    { name: "Acortar mangas", price: 4500 },
+    { name: "Zurcido / Parche", price: 3000 },
+    { name: "Ajuste completo / Varios", price: 9000 },
+    { name: "Otro arreglo personalizado", price: 0 }
+  ];
+  const GARMENTS = ["Pantalón", "Jeans", "Parka / Chaqueta", "Vestido", "Falda", "Uniforme escolar", "Polerón / Chaleco", "Cortina / Hogar", "Otra prenda"];
+  const CATALOG = [
+    { name: "Delantal de cocina", price: 6500 },
+    { name: "Bolsa de tela reforzada", price: 3500 },
+    { name: "Set de hilos básicos", price: 2500 },
+    { name: "Cierre metálico 20cm", price: 2000, stockId: "cierres" },
+    { name: "Pack botones surtidos", price: 1500, stockId: "botones" },
+    { name: "Prenda reacondicionada", price: 8000 }
+  ];
+  const SEED = createDemoData();
+  let state = loadState();
+  let authConfig = loadAuthConfig();
+  let authUnlocked = Boolean(authConfig && hasUnlockedSession());
+  let activeView = "dashboard";
+  let pendingView = "dashboard";
+  let portalOrderId = "";
+  const root = document.getElementById("view-root");
+  const modalRoot = document.getElementById("modal-root");
+  const toastRegion = document.getElementById("toast-region");
+
+  function localDate(offset = 0) {
+    const date = new Date();
+    date.setDate(date.getDate() + offset);
+    return dateKey(date);
+  }
+  function dateKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  }
+  function isoAgo(days, hour = 10) {
+    const date = new Date();
+    date.setDate(date.getDate() - days);
+    date.setHours(hour, 15, 0, 0);
+    return date.toISOString();
+  }
+  function createDemoData() {
+    const clients = [
+      { id: "c1", name: "Rosa Alvarado", phone: "56961234567", sector: "Valdivia Urbano" },
+      { id: "c2", name: "Elena Millanao", phone: "56962345678", sector: "Niebla" },
+      { id: "c3", name: "Patricia Huenchullán", phone: "56963456789", sector: "Corral" },
+      { id: "c4", name: "Camila Soto", phone: "56964567890", sector: "Valdivia Urbano" },
+      { id: "c5", name: "María Paredes", phone: "56965678901", sector: "Mancera" },
+      { id: "c6", name: "Ana Cárdenas", phone: "56966789012", sector: "San José" },
+      { id: "c7", name: "Javiera Nahuel", phone: "56967890123", sector: "Valdivia Urbano" },
+      { id: "c8", name: "Sofía Vera", phone: "56968901234", sector: "Otro sector rural" }
+    ];
+    const orders = [
+      ["1042", "c1", "Jeans", "Basta / Dobladillo", "En proceso", 3500, 1500, 0],
+      ["1043", "c2", "Parka / Chaqueta", "Cambio de cierre", "Lista para retirar", 5000, 2000, 1],
+      ["1044", "c3", "Pantalón", "Entalle / Ajuste de cintura", "Ingresada", 6000, 0, 1],
+      ["1040", "c4", "Vestido", "Acortar mangas", "En proceso", 4500, 2000, 2],
+      ["1041", "c5", "Cortina / Hogar", "Basta / Dobladillo", "Ingresada", 3500, 0, 2],
+      ["1038", "c6", "Uniforme escolar", "Cambio de cierre", "En proceso", 5000, 2500, 3],
+      ["1039", "c7", "Falda", "Zurcido / Parche", "Lista para retirar", 3000, 0, 1],
+      ["1037", "c8", "Polerón / Chaleco", "Ajuste completo / Varios", "Ingresada", 9000, 3000, 4]
+    ].map((row, i) => ({
+      id: row[0], clientId: row[1], garment: row[2], fix: row[3], status: row[4], total: row[5], deposit: row[6],
+      paymentMethod: "Efectivo", notes: i === 0 ? "Mantener la basta original." : "", date: isoAgo(row[7]),
+      dueDate: localDate(i < 2 ? 1 : 3), travelNotice: ["Niebla", "Corral", "Mancera"].includes(clients.find(c => c.id === row[1]).sector)
+    }));
+    const stock = [
+      { id: "cierres", name: "Cierres metálicos", quantity: 3, minimum: 5, unit: "unidades" },
+      { id: "hilos", name: "Hilos surtidos", quantity: 8, minimum: 4, unit: "carretes" },
+      { id: "agujas", name: "Agujas", quantity: 2, minimum: 5, unit: "paquetes" },
+      { id: "botones", name: "Botones surtidos", quantity: 4, minimum: 8, unit: "paquetes" },
+      { id: "elasticos", name: "Elásticos", quantity: 12, minimum: 5, unit: "metros" },
+      { id: "entretela", name: "Entretela", quantity: 6, minimum: 3, unit: "metros" },
+      { id: "velcro", name: "Velcro", quantity: 7, minimum: 4, unit: "metros" },
+      { id: "tiza", name: "Tiza de sastre", quantity: 5, minimum: 2, unit: "unidades" }
+    ];
+    return {
+      version: 1, nextOrderId: 1045, clients, orders, stock, sales: [
+        { id: "v-demo-1", date: isoAgo(0, 9), items: [{ name: "Set de hilos básicos", quantity: 1, price: 2500 }], total: 2500, paymentMethod: "Efectivo", clientId: "" },
+        { id: "v-demo-2", date: isoAgo(0, 10), items: [{ name: "Delantal de cocina", quantity: 1, price: 6500 }], total: 6500, paymentMethod: "Transferencia", clientId: "" }
+      ], movements: [
+        { id: "m-demo-1", date: isoAgo(0, 8), type: "Apertura", description: "Fondo inicial", amount: 20000, method: "Efectivo" },
+        { id: "m-demo-2", date: isoAgo(0, 9), type: "Venta", description: "Set de hilos básicos", amount: 2500, method: "Efectivo" },
+        { id: "m-demo-3", date: isoAgo(0, 10), type: "Abono", description: "Abono pedido #1042", amount: 1500, method: "Efectivo" },
+        { id: "m-demo-4", date: isoAgo(0, 10), type: "Venta", description: "Delantal de cocina", amount: 6500, method: "Transferencia" }
+      ], cash: { open: true, openingAmount: 20000, openedAt: isoAgo(0, 8) }
+    };
+  }
+  function loadState() {
+    for (const key of [STORAGE_KEY, BACKUP_KEY]) {
+      try {
+        const saved = localStorage.getItem(key);
+        if (!saved) continue;
+        const parsed = JSON.parse(saved);
+        if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.orders) || !Array.isArray(parsed.stock)) throw new Error("Respaldo con formato no reconocido.");
+        if (key === BACKUP_KEY) localStorage.setItem(STORAGE_KEY, saved);
+        else {
+          try { localStorage.setItem(BACKUP_KEY, saved); }
+          catch (error) { console.error("No se pudo actualizar la copia automática.", error); }
+        }
+        return parsed;
+      } catch (error) {
+        console.error(`No se pudo cargar el almacenamiento "${key}".`, error);
+      }
+    }
+    const initialData = JSON.stringify(SEED);
+    try {
+      localStorage.setItem(STORAGE_KEY, initialData);
+      localStorage.setItem(BACKUP_KEY, initialData);
+    } catch (error) { console.error("No se pudieron inicializar los datos locales de PinchaGest.", error); }
+    return structuredClone(SEED);
+  }
+  function saveState() {
+    try {
+      const serialized = JSON.stringify(state);
+      localStorage.setItem(STORAGE_KEY, serialized);
+      localStorage.setItem(BACKUP_KEY, serialized);
+    }
+    catch (error) { notify("No se pudieron guardar los cambios. Revisa el espacio disponible del navegador.", true); console.error(error); }
+  }
+  function loadAuthConfig() {
+    try {
+      const raw = localStorage.getItem(AUTH_KEY);
+      if (!raw) return null;
+      const config = JSON.parse(raw);
+      return typeof config.salt === "string" && typeof config.hash === "string" ? config : null;
+    } catch (error) {
+      console.error("No se pudo leer la configuración de acceso local.", error);
+      return null;
+    }
+  }
+  function hasUnlockedSession() {
+    try { return sessionStorage.getItem(AUTH_SESSION_KEY) === "true"; }
+    catch (error) { console.error("No se pudo consultar la sesión local.", error); return false; }
+  }
+  function esc(value = "") {
+    return String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+  }
+  function money(value) {
+    return "$ " + Math.max(0, Number(value) || 0).toLocaleString("es-CL");
+  }
+  function formatDate(value, options = { day: "2-digit", month: "short" }) {
+    if (!value) return "Sin fecha";
+    return new Date(value.length === 10 ? `${value}T12:00:00` : value).toLocaleDateString("es-CL", options);
+  }
+  function dateTime(value) {
+    return new Date(value).toLocaleString("es-CL", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  }
+  function clientOf(order) { return state.clients.find(client => client.id === order.clientId) || { name: "Cliente", phone: "", sector: "" }; }
+  function orderStatusClass(status) {
+    return status === "En proceso" ? "proceso" : status === "Lista para retirar" ? "retirar" : status === "Entregada" ? "entregada" : "ingresada";
+  }
+  function activeOrders() { return state.orders.filter(order => order.status !== "Entregada"); }
+  function todayMovements() { return state.movements.filter(item => dateKey(new Date(item.date)) === localDate()); }
+  function cashSessionMovements() {
+    const openedAt = state.cash.openedAt ? new Date(state.cash.openedAt) : null;
+    return openedAt && dateKey(openedAt) === localDate()
+      ? todayMovements().filter(item => new Date(item.date) >= openedAt)
+      : todayMovements();
+  }
+  function cashIncome(method) {
+    return cashSessionMovements().filter(item => ["Abono", "Venta"].includes(item.type) && item.method === method).reduce((sum, item) => sum + item.amount, 0);
+  }
+  function cashExpenses(method = "") {
+    return cashSessionMovements().filter(item => item.type === "Egreso" && (!method || item.method === method)).reduce((sum, item) => sum + item.amount, 0);
+  }
+  function openingAmountToday() {
+    if (state.cash.openedAt && dateKey(new Date(state.cash.openedAt)) === localDate()) {
+      return Number(state.cash.openingAmount) || 0;
+    }
+    return todayMovements().filter(item => item.type === "Apertura").reduce((sum, item) => sum + item.amount, 0);
+  }
+  function cashTotal() {
+    const openedToday = state.cash.openedAt && dateKey(new Date(state.cash.openedAt)) === localDate();
+    const income = cashIncome("Efectivo");
+    const expenses = cashExpenses("Efectivo");
+    const opening = openedToday ? Number(state.cash.openingAmount) || 0 : openingAmountToday();
+    return opening + income - expenses;
+  }
+  function cashClosedToday() {
+    return Boolean(state.cash.closedAt && dateKey(new Date(state.cash.closedAt)) === localDate());
+  }
+  function hasCashCountToday() {
+    return cashClosedToday() && Number.isFinite(state.cash.closingAmount);
+  }
+  function displayedCashTotal() {
+    return !state.cash.open && hasCashCountToday()
+      ? state.cash.closingAmount
+      : cashTotal();
+  }
+  function viewHeader(eyebrow, title, subtitle, action = "") {
+    return `<header class="page-header"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${subtitle}</p></div>${action}</header>`;
+  }
+  function cashPill() {
+    return `<button type="button" class="status-pill ${state.cash.open ? "" : "closed"}" data-action="toggle-cash" title="Ver arqueo y cambiar estado de caja"><span class="status-dot"></span>CAJA ${state.cash.open ? "ABIERTA" : "CERRADA"}</button>`;
+  }
+  function dashboard() {
+    const recent = [...state.orders].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
+    return `${viewHeader("PANEL DE CONTROL", "Hola, Marlén", "Este es el resumen de tu local.", cashPill())}
+      <section class="kpi-grid" aria-label="Resumen del día">
+        <article class="kpi-card cash"><div class="kpi-label">CAJA DEL DÍA</div><div class="kpi-row"><strong class="kpi-value">${displayedCashTotal() ? money(displayedCashTotal()) : "$ —"}</strong><span class="kpi-note">${hasCashCountToday() ? "Efectivo contado" : "Efectivo estimado"}</span></div></article>
+        <article class="kpi-card orders-kpi"><div class="kpi-label">PEDIDOS ACTIVOS</div><div class="kpi-row"><strong class="kpi-value">${String(activeOrders().length).padStart(2, "0")}</strong><span class="kpi-note">Seguimiento de prendas</span></div></article>
+        <article class="kpi-card stock-kpi"><div class="kpi-label">ALERTAS DE STOCK</div><div class="kpi-row"><strong class="kpi-value">${String(state.stock.filter(item => item.quantity < item.minimum).length).padStart(2, "0")}</strong><span class="kpi-note">Productos por revisar</span></div></article>
+      </section>
+      <section class="dashboard-grid">
+        <article class="panel"><div class="panel-heading"><h2>PEDIDOS RECIENTES</h2><button class="text-link" data-view="orders">Ver todos →</button></div>
+          <div class="recent-list">${recent.length ? recent.map(order => {
+            const client = clientOf(order);
+            return `<div class="recent-row"><div class="recent-person"><strong>Pedido #${esc(order.id)} · ${esc(client.name)}</strong><small>${esc(order.garment)} · Entrega ${formatDate(order.dueDate)}</small></div><button class="badge ${orderStatusClass(order.status)}" data-action="advance-status" data-id="${esc(order.id)}" title="Clic para avanzar estado">${esc(order.status)}</button></div>`;
+          }).join("") : `<div class="empty-state">Todavía no hay pedidos. ¡Registra el primero!</div>`}</div></article>
+        <aside class="quick-panel"><h2>ACCIÓN RÁPIDA</h2><div class="quick-actions"><button class="button button-primary" data-action="new-sale">+ Venta</button><button class="button button-outline" data-action="new-order">+ Pedido</button></div><p class="quick-footnote">Registra arreglos, abonos y ventas del mesón en pocos pasos.</p></aside>
+      </section>
+      <p class="footer-note">Las Pilchas · ${SHOP_ADDRESS} · Tus datos se guardan en este dispositivo.</p>`;
+  }
+  function landing() {
+    return `<section class="hero"><div><div class="eyebrow">HECHO PARA EL TRABAJO REAL DEL LOCAL</div><h1>PinchaGest para Las Pilchas: gestión simple para el trabajo real del local</h1><p>Menos cuaderno, más tiempo para cada prenda. Pedidos, abonos y ventas ordenados en un solo lugar para Marlén y su hermana.</p><div class="hero-actions"><button class="button button-primary" data-view="dashboard">Bienvenida, Marlén</button><button class="button button-outline" data-view="portal">Consultar estado de mi prenda</button></div></div>
+      <div class="hero-preview"><div class="preview-top"><span class="preview-logo">PINCHA<strong>GEST</strong></span><span class="badge retirar">Caja abierta</span></div><div class="preview-line"><span>Pedido #1042 · Jeans</span><span class="badge proceso">En proceso</span></div><div class="preview-line"><span>Saldo del día</span><strong>${money(cashTotal())}</strong></div><div class="preview-line"><span>Próxima entrega</span><strong>Mañana</strong></div></div></section>
+      <section class="feature-section"><div class="eyebrow">GESTIÓN SIMPLE PARA EL TRABAJO REAL DEL LOCAL</div><h2>Todo el taller, más ordenado.</h2><div class="feature-grid">
+        <article class="feature-card"><span class="feature-icon">✓</span><h3>Adiós al cuaderno manual</h3><p>Pedidos y datos de cada cliente siempre a mano, desde el mesón.</p></article>
+        <article class="feature-card"><span class="feature-icon">$</span><h3>Control exacto de efectivo y abonos</h3><p>Registra abonos típicos de $2.000 a $12.000 CLP y conoce el saldo pendiente.</p></article>
+        <article class="feature-card"><span class="feature-icon">↗</span><h3>Aviso por WhatsApp en 1 clic</h3><p>Un mensaje listo para avisar cuando la prenda ya se puede retirar.</p></article>
+        <article class="feature-card"><span class="feature-icon">◎</span><h3>Consulta para clientes de zonas rurales</h3><p>Corral, Niebla, Mancera, San José y más: revisa el estado antes de viajar a Valdivia.</p></article>
+      </div></section><p class="footer-note">Las Pilchas · Local 8, Galería Picarte, Valdivia</p>`;
+  }
+  function ordersView() {
+    return `${viewHeader("TALLER", "Pedidos", "Sigue cada prenda desde que ingresa hasta que vuelve a casa.", `<button class="button button-primary" data-action="new-order">+ Nuevo pedido</button>`)}
+      <div class="toolbar"><input class="field-control search-control" id="order-search" placeholder="Buscar por cliente o número de pedido…" aria-label="Buscar pedidos"><select class="field-control" id="order-status-filter" aria-label="Filtrar por estado"><option>Todos los estados</option>${ORDER_STATES.map(status => `<option>${status}</option>`).join("")}</select><select class="field-control" id="order-sector-filter" aria-label="Filtrar por procedencia"><option>Todos los sectores</option>${SECTORS.map(sector => `<option>${sector}</option>`).join("")}</select></div>
+      <section class="panel"><div id="orders-table"></div></section>`;
+  }
+  function renderOrdersTable() {
+    const query = (document.getElementById("order-search")?.value || "").trim().toLowerCase();
+    const status = document.getElementById("order-status-filter")?.value || "Todos los estados";
+    const sector = document.getElementById("order-sector-filter")?.value || "Todos los sectores";
+    const rows = [...state.orders].sort((a, b) => b.date.localeCompare(a.date)).filter(order => {
+      const client = clientOf(order);
+      return (!query || `${order.id} ${client.name}`.toLowerCase().includes(query)) && (status === "Todos los estados" || order.status === status) && (sector === "Todos los sectores" || client.sector === sector);
+    });
+    const container = document.getElementById("orders-table");
+    if (!container) return;
+    container.innerHTML = rows.length ? `<div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente / sector</th><th>Arreglo</th><th>Estado</th><th>Saldo</th><th>Entrega</th><th>Acciones</th></tr></thead><tbody>${rows.map(order => {
+      const client = clientOf(order);
+      return `<tr><td><span class="cell-strong">#${esc(order.id)}</span><span class="cell-muted">${formatDate(order.date)}</span></td><td><span class="cell-strong">${esc(client.name)}</span><span class="cell-muted">${esc(client.sector)}</span></td><td><span class="cell-strong">${esc(order.garment)}</span><span class="cell-muted">${esc(order.fix)}</span></td><td><select class="inline-select" data-action="set-status" data-id="${esc(order.id)}" aria-label="Estado pedido ${esc(order.id)}">${ORDER_STATES.map(value => `<option ${value === order.status ? "selected" : ""}>${value}</option>`).join("")}</select></td><td>${money(order.total - order.deposit)}</td><td>${formatDate(order.dueDate)}</td><td><div class="table-actions"><button class="button button-soft button-small" data-action="order-detail" data-id="${esc(order.id)}">Detalle</button><button class="button button-soft button-small" data-action="whatsapp" data-id="${esc(order.id)}">WhatsApp</button>${order.status !== "Entregada" && order.total > order.deposit ? `<button class="button button-dark button-small" data-action="collect-balance" data-id="${esc(order.id)}">Cobrar</button>` : ""}</div></td></tr>`;
+    }).join("")}</tbody></table></div>` : `<div class="empty-state">No encontramos pedidos con esos filtros.</div>`;
+  }
+  function salesView() {
+    return `${viewHeader("MESÓN", "Ventas", "Historial de ventas directas y resumen de caja.", `<button class="button button-primary" data-action="new-sale">+ Nueva venta</button>`)}
+      <div class="toolbar"><input class="field-control" id="sales-date-filter" type="date" aria-label="Filtrar ventas por fecha" value="${localDate()}"><select class="field-control" id="sales-method-filter" aria-label="Filtrar por medio de pago"><option>Todos los medios</option><option>Efectivo</option><option>Transferencia</option></select></div>
+      <div class="summary-strip" id="sales-summary"></div><section class="panel"><div id="sales-table"></div></section>`;
+  }
+  function renderSalesTable() {
+    const date = document.getElementById("sales-date-filter")?.value || "";
+    const method = document.getElementById("sales-method-filter")?.value || "Todos los medios";
+    const rows = [...state.sales].filter(sale => (!date || dateKey(new Date(sale.date)) === date) && (method === "Todos los medios" || sale.paymentMethod === method)).sort((a, b) => b.date.localeCompare(a.date));
+    const total = rows.filter(sale => !sale.voided).reduce((sum, sale) => sum + sale.total, 0);
+    const summary = document.getElementById("sales-summary");
+    if (summary) summary.innerHTML = `<div class="summary-tile"><span>Ventas del filtro</span><strong>${rows.filter(sale => !sale.voided).length}</strong></div><div class="summary-tile"><span>Total vendido</span><strong>${money(total)}</strong></div><div class="summary-tile"><span>Efectivo recibido</span><strong>${money(rows.filter(s => !s.voided && s.paymentMethod === "Efectivo").reduce((n, s) => n + s.total, 0))}</strong></div>`;
+    const container = document.getElementById("sales-table");
+    if (!container) return;
+    container.innerHTML = rows.length ? `<div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Detalle</th><th>Cliente</th><th>Medio</th><th>Total</th><th></th></tr></thead><tbody>${rows.map(sale => `<tr><td>${dateTime(sale.date)}</td><td>${sale.items.map(item => `${esc(item.name)} × ${item.quantity}`).join("<br>")}${sale.voided ? `<span class="cell-muted">ANULADA</span>` : ""}</td><td>${sale.clientId ? esc((state.clients.find(c => c.id === sale.clientId) || {}).name || "Cliente") : "Cliente de paso"}</td><td>${esc(sale.paymentMethod)}</td><td><span class="cell-strong">${money(sale.total)}</span></td><td><div class="table-actions"><button class="button button-soft button-small" data-action="sale-detail" data-id="${esc(sale.id)}">Detalle</button>${sale.voided ? "" : `<button class="button button-soft button-small" data-action="void-sale" data-id="${esc(sale.id)}">Anular</button>`}</div></td></tr>`).join("")}</tbody></table></div>` : `<div class="empty-state">No hay ventas para los filtros seleccionados.</div>`;
+  }
+  function cashView() {
+    const movementRows = [...todayMovements()].sort((a, b) => b.date.localeCompare(a.date));
+    const displayedCash = displayedCashTotal();
+    const cashDescription = state.cash.open
+      ? `Abierta ${dateTime(state.cash.openedAt)} · Fondo inicial ${money(state.cash.openingAmount)}`
+      : hasCashCountToday()
+        ? `Cerrada ${dateTime(state.cash.closedAt)} · ${state.cash.closingDifference === 0 ? "Caja cuadrada" : `${state.cash.closingDifference > 0 ? "Sobra" : "Falta"} ${money(Math.abs(state.cash.closingDifference))}`}`
+        : cashClosedToday()
+          ? `Cerrada ${dateTime(state.cash.closedAt)} · Cierre anterior sin arqueo`
+        : "Abre la caja para registrar la jornada.";
+    const movementHtml = movementRows.length ? `<div class="table-wrap"><table><thead><tr><th>Hora</th><th>Movimiento</th><th>Tipo</th><th>Medio</th><th>Monto</th></tr></thead><tbody>${movementRows.map(item => `<tr><td>${dateTime(item.date)}</td><td>${esc(item.description)}</td><td>${esc(item.type)}</td><td>${esc(item.method || "Efectivo")}</td><td>${item.type === "Egreso" ? "− " : item.type === "Cierre" ? "= " : "+ "}${money(item.amount)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty-state">Aún no hay movimientos hoy.</div>`;
+    return `${viewHeader("CONTROL DIARIO", "Caja", "Apertura, ingresos, egresos y arqueo del local.", `<button class="button button-primary" data-action="new-expense">− Registrar egreso</button>`)}
+      <section class="cash-banner"><div><h2>Caja ${state.cash.open ? "abierta" : "cerrada"}</h2><p>${cashDescription}</p></div><div><span class="cash-total-label">${!state.cash.open && hasCashCountToday() ? "EFECTIVO CONTADO" : "EFECTIVO ESTIMADO"}</span><strong>${money(displayedCash)}</strong><div><button class="button button-outline button-small" data-action="toggle-cash">${state.cash.open ? "Cerrar y hacer arqueo" : "Abrir caja"}</button></div></div></section>
+      <div class="summary-strip cash-summary"><div class="summary-tile"><span>Fondo inicial</span><strong>${money(openingAmountToday())}</strong></div><div class="summary-tile"><span>Ingresos en efectivo</span><strong>${money(cashIncome("Efectivo"))}</strong></div><div class="summary-tile"><span>Egresos en efectivo</span><strong>${money(cashExpenses("Efectivo"))}</strong></div><div class="summary-tile"><span>Ingresos por transferencia</span><strong>${money(cashIncome("Transferencia"))}</strong></div><div class="summary-tile"><span>Egresos por transferencia</span><strong>${money(cashExpenses("Transferencia"))}</strong></div><div class="summary-tile"><span>Efectivo estimado</span><strong>${money(cashTotal())}</strong></div></div>
+      <div class="notice cash-explainer">Cálculo: fondo inicial + ventas y abonos en efectivo − egresos en efectivo. Las transferencias se muestran aparte.</div>
+      <section class="panel"><div class="panel-heading"><h2>MOVIMIENTOS DEL DÍA</h2><span class="kpi-note">Abonos, ventas y egresos</span></div>${movementHtml}</section>`;
+  }
+  function stockView() {
+    return `${viewHeader("TALLER", "Stock de insumos", "Controla materiales y repón lo que está por agotarse.")}
+      <div class="notice section-spacer">Las alertas aparecen cuando la cantidad actual está por debajo del mínimo configurado.</div>
+      <section class="stock-grid section-spacer">${state.stock.map(item => `<article class="stock-card ${item.quantity < item.minimum ? "low" : ""}"><h3>${esc(item.name)}</h3><p>${item.quantity < item.minimum ? "Necesita reposición" : "Inventario disponible"}</p><div class="stock-count"><strong>${item.quantity}</strong><small>${esc(item.unit)} · mínimo ${item.minimum}</small></div><button class="button ${item.quantity < item.minimum ? "button-primary" : "button-soft"} button-small" data-action="replenish" data-id="${esc(item.id)}">+ Reponer</button> <button class="text-link" data-action="edit-stock" data-id="${esc(item.id)}">Editar mínimo</button></article>`).join("")}</section>`;
+  }
+  function clientsView() {
+    const clients = [...state.clients].sort((a, b) => a.name.localeCompare(b.name, "es"));
+    return `${viewHeader("COMUNIDAD", "Clientes", "Cada persona y cada encargo, todo en orden.", `<button class="button button-primary" data-action="new-order">+ Nuevo pedido</button>`)}
+      <div class="toolbar"><input class="field-control search-control" id="client-search" placeholder="Buscar cliente o sector…" aria-label="Buscar clientes"></div>
+      <section class="panel"><div id="clients-table">${clients.length ? `<div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Sector</th><th>Pedidos</th><th>WhatsApp</th><th>Historial</th></tr></thead><tbody>${clients.map(client => {
+        const count = state.orders.filter(order => order.clientId === client.id).length;
+        const last = [...state.orders].filter(order => order.clientId === client.id).sort((a, b) => b.date.localeCompare(a.date))[0];
+        return `<tr data-client-row data-search="${esc(`${client.name} ${client.sector}`.toLowerCase())}"><td><span class="cell-strong">${esc(client.name)}</span><span class="cell-muted">${esc(client.phone)}</span></td><td>${esc(client.sector)}</td><td>${count}</td><td><a class="button button-soft button-small" href="${whatsappUrl(client.phone, `Hola ${client.name}, te saludamos del taller Las Pilchas (Local 8, Galería Picarte, Valdivia). ¿En qué podemos ayudarte?`)}" target="_blank" rel="noopener">Escribir</a></td><td>${last ? `<span class="cell-strong">#${esc(last.id)} · ${esc(last.status)}</span><span class="cell-muted">${esc(last.garment)} · ${money(last.total)}</span>` : "—"}</td></tr>`;
+      }).join("")}</tbody></table></div>` : `<div class="empty-state">Aún no hay clientes registrados.</div>`}</div></section>`;
+  }
+  function portalView() {
+    const match = portalOrderId ? state.orders.find(order => String(order.id) === portalOrderId) : null;
+    const client = match ? clientOf(match) : null;
+    const progress = match ? (ORDER_STATES.indexOf(match.status) + 1) * 25 : 0;
+    const result = portalOrderId ? (match ? `<div class="portal-result"><div class="panel-heading"><div><span class="eyebrow">PEDIDO #${esc(match.id)}</span><h2 style="margin:5px 0">${esc(match.garment)} · ${esc(match.fix)}</h2></div><span class="badge ${orderStatusClass(match.status)}">${esc(match.status)}</span></div><p class="portal-intro">${esc(client.name)} · ${esc(client.sector)}</p><div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div><div class="progress-labels"><span>Ingresada</span><span>En proceso</span><span>Lista para retirar</span><span>Entregada</span></div><div class="portal-details"><div class="detail-tile"><small>Fecha estimada de entrega</small><strong>${formatDate(match.dueDate, { weekday: "long", day: "numeric", month: "long" })}</strong></div><div class="detail-tile"><small>Saldo pendiente</small><strong>${money(match.total - match.deposit)}</strong></div><div class="detail-tile"><small>Taller</small><strong>${SHOP_ADDRESS}</strong></div><div class="detail-tile"><small>Próximo paso</small><strong>${match.status === "Lista para retirar" ? "¡Te esperamos para retirar!" : match.status === "Entregada" ? "Pedido entregado" : "Te avisaremos cuando esté listo."}</strong></div></div>${match.status === "Lista para retirar" ? `<p class="notice section-spacer">Ya puedes venir por tu prenda. Si viajas desde lejos, confirma tu visita por WhatsApp.</p>` : ""}</div>` : `<div class="portal-result"><div class="notice">No encontramos el pedido <strong>#${esc(portalOrderId)}</strong>. Revisa el número o comunícate con el taller.</div></div>`) : "";
+    return `${viewHeader("SEGUIMIENTO DE PRENDAS", "Portal Cliente", "Consulta el avance de tu arreglo antes de viajar a Valdivia.")}
+      <section class="panel portal-card"><div class="panel-heading"><h2>¿Cómo va mi prenda?</h2><span class="badge retirar">Las Pilchas</span></div><p class="portal-intro">Para vecinos de Valdivia, Corral, Niebla, Mancera, San José y sectores cercanos. Ingresa el número que aparece en tu comprobante.</p><form class="portal-form" id="portal-form"><input class="field-control" id="portal-id" inputmode="numeric" pattern="[0-9]+" placeholder="Ej. 1042" aria-label="Número de pedido" value="${esc(portalOrderId)}" required><button class="button button-primary" type="submit">Consultar pedido</button></form>${result}</section><p class="footer-note">¿Necesitas ayuda? Visítanos en ${SHOP_ADDRESS}.</p>`;
+  }
+  function render() {
+    const views = { dashboard, home: landing, orders: ordersView, sales: salesView, cash: cashView, stock: stockView, clients: clientsView, portal: portalView };
+    activeView = views[activeView] ? activeView : "dashboard";
+    if (isProtectedView(activeView) && !authUnlocked) {
+      renderAuthGate();
+      return;
+    }
+    root.innerHTML = views[activeView]();
+    document.querySelectorAll("[data-view]").forEach(link => link.classList.toggle("active", link.dataset.view === activeView));
+    if (activeView === "orders") renderOrdersTable();
+    if (activeView === "sales") renderSalesTable();
+    document.body.classList.remove("menu-open");
+    document.getElementById("menu-button").setAttribute("aria-expanded", "false");
+  }
+  function notify(message, error = false) {
+    const toast = document.createElement("div");
+    toast.className = `toast${error ? " error" : ""}`;
+    toast.textContent = message;
+    toastRegion.appendChild(toast);
+    window.setTimeout(() => toast.remove(), 3800);
+  }
+  function isProtectedView(view) {
+    return ["dashboard", "orders", "sales", "cash", "stock", "clients"].includes(view);
+  }
+  function renderAuthGate(errorMessage = "") {
+    const setup = !authConfig;
+    modalRoot.innerHTML = "";
+    root.innerHTML = `<section class="auth-stage"><div class="auth-card"><div class="auth-brand"><span>PINCHA</span><strong>GEST</strong></div><div class="eyebrow">${setup ? "PRIMER ACCESO" : "ACCESO DE MARLÉN"}</div><h1>${setup ? "Bienvenida, Marlén" : "Ingresa a tu panel"}</h1><p>${setup ? "Crea un PIN personal para abrir la caja y administrar el taller." : "Tu panel de Las Pilchas está protegido con tu PIN personal."}</p><form id="auth-form"><div class="form-field"><label for="auth-pin">${setup ? "Crea tu PIN (6 o más dígitos)" : "PIN de acceso"}</label><input id="auth-pin" type="password" inputmode="numeric" pattern="[0-9]{6,}" minlength="6" autocomplete="${setup ? "new-password" : "current-password"}" required></div>${setup ? `<div class="form-field"><label for="auth-confirm">Confirma tu PIN</label><input id="auth-confirm" type="password" inputmode="numeric" pattern="[0-9]{6,}" minlength="6" autocomplete="new-password" required></div>` : ""}<p class="auth-error" id="auth-error" role="alert" ${errorMessage ? "" : "hidden"}>${esc(errorMessage)}</p><button class="button button-primary auth-submit" type="submit">${setup ? "Crear PIN y entrar" : "Entrar al panel"}</button></form><div class="auth-notice"><strong>Acceso local</strong><span>El PIN bloquea el panel en esta sesión. Para proteger datos entre dispositivos se requiere autenticación y almacenamiento en un servidor.</span></div></div></section>`;
+    document.body.classList.remove("menu-open");
+    document.getElementById("menu-button").setAttribute("aria-expanded", "false");
+    document.querySelectorAll("[data-view]").forEach(link => link.classList.toggle("active", link.dataset.view === activeView));
+    document.getElementById("auth-pin").focus();
+  }
+  function hexToBytes(hex) {
+    return new Uint8Array(hex.match(/.{2}/g).map(pair => parseInt(pair, 16)));
+  }
+  async function hashPin(pin, salt) {
+    if (!globalThis.crypto?.subtle) throw new Error("Este navegador no permite crear un PIN seguro. Abre PinchaGest desde GitHub Pages o un navegador actualizado.");
+    const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: hexToBytes(salt), iterations: 120000, hash: "SHA-256" }, material, 256);
+    return Array.from(new Uint8Array(bits), byte => byte.toString(16).padStart(2, "0")).join("");
+  }
+  async function submitAuth(form) {
+    const pin = document.getElementById("auth-pin").value;
+    const setup = !authConfig;
+    let message = "";
+    if (!/^\d{6,}$/.test(pin)) message = "El PIN debe tener al menos 6 dígitos.";
+    else if (setup && pin !== document.getElementById("auth-confirm").value) message = "Los PIN no coinciden.";
+    if (message) {
+      document.getElementById("auth-error").textContent = message;
+      document.getElementById("auth-error").hidden = false;
+      return;
+    }
+    try {
+      if (setup) {
+        const salt = Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, "0")).join("");
+        const config = { salt, hash: await hashPin(pin, salt) };
+        localStorage.setItem(AUTH_KEY, JSON.stringify(config));
+        authConfig = config;
+      } else if (await hashPin(pin, authConfig.salt) !== authConfig.hash) {
+        document.getElementById("auth-error").textContent = "PIN incorrecto. Inténtalo nuevamente.";
+        document.getElementById("auth-error").hidden = false;
+        document.getElementById("auth-pin").select();
+        return;
+      }
+      sessionStorage.setItem(AUTH_SESSION_KEY, "true");
+      authUnlocked = true;
+      activeView = pendingView;
+      render();
+    } catch (error) {
+      console.error("No se pudo completar el acceso local.", error);
+      document.getElementById("auth-error").textContent = error.message || "No se pudo guardar el PIN en este navegador.";
+      document.getElementById("auth-error").hidden = false;
+    }
+  }
+  function changeView(view) {
+    if (!["dashboard", "home", "orders", "sales", "cash", "stock", "clients", "portal"].includes(view)) return;
+    if (isProtectedView(view) && !authUnlocked) {
+      pendingView = view;
+      activeView = view;
+      if (location.hash !== `#${view}`) location.hash = view;
+      renderAuthGate();
+      return;
+    }
+    activeView = view;
+    if (view !== "portal") portalOrderId = "";
+    if (location.hash !== `#${view}`) location.hash = view;
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function statusBadge(status) { return `<span class="badge ${orderStatusClass(status)}">${esc(status)}</span>`; }
+  function whatsappUrl(phone, message) {
+    const cleanPhone = String(phone || "").replace(/\D/g, "");
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+  }
+  function orderWhatsApp(order) {
+    const client = clientOf(order);
+    const message = `Hola ${client.name}, te saludamos del taller Las Pilchas (Local 8, Galería Picarte, Valdivia). Tu prenda (${order.garment} - ${order.fix}, Pedido #${order.id}) ya está ${order.status}. Saldo pendiente: ${money(order.total - order.deposit)}. ¡Te esperamos!`;
+    window.open(whatsappUrl(client.phone, message), "_blank", "noopener");
+  }
+  function openModal(title, body, narrow = false) {
+    modalRoot.innerHTML = `<div class="modal-backdrop" data-action="backdrop-close"><section class="modal ${narrow ? "narrow" : ""}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-head"><div><div class="eyebrow">LAS PILCHAS · LOCAL 8</div><h2 id="modal-title">${esc(title)}</h2></div><button type="button" class="icon-button" data-action="close-modal" aria-label="Cerrar">×</button></header><div class="modal-body">${body}</div></section></div>`;
+    modalRoot.querySelector("input,select,button")?.focus();
+    modalRoot.querySelector(".modal-backdrop").addEventListener("click", event => { if (event.target === event.currentTarget) closeModal(); });
+  }
+  function handleModalKeydown(event) { if (event.key === "Escape" && modalRoot.innerHTML) closeModal(); }
+  function closeModal() { modalRoot.innerHTML = ""; }
+  document.addEventListener("keydown", handleModalKeydown);
+  function showOrderDetail(id) {
+    const order = state.orders.find(item => String(item.id) === String(id));
+    if (!order) return;
+    const client = clientOf(order);
+    openModal(`Detalle pedido #${order.id}`, `<div class="summary-strip"><div class="summary-tile"><span>Estado</span><strong style="font-size:13px">${esc(order.status)}</strong></div><div class="summary-tile"><span>Total</span><strong>${money(order.total)}</strong></div><div class="summary-tile"><span>Saldo pendiente</span><strong>${money(order.total - order.deposit)}</strong></div></div><div class="form-grid"><div class="detail-tile"><small>Cliente</small><strong>${esc(client.name)}</strong></div><div class="detail-tile"><small>Teléfono WhatsApp</small><strong>${esc(client.phone)}</strong></div><div class="detail-tile"><small>Procedencia</small><strong>${esc(client.sector)}</strong></div><div class="detail-tile"><small>Prenda y arreglo</small><strong>${esc(order.garment)} · ${esc(order.fix)}</strong></div><div class="detail-tile"><small>Ingreso / entrega estimada</small><strong>${formatDate(order.date)} · ${formatDate(order.dueDate)}</strong></div><div class="detail-tile"><small>Abono registrado</small><strong>${money(order.deposit)} · ${esc(order.paymentMethod)}</strong></div><div class="detail-tile" style="grid-column:1/-1"><small>Observaciones del taller</small><strong>${esc(order.notes || "Sin observaciones")}</strong></div></div>${order.travelNotice ? `<p class="notice">Cliente viaja desde zona rural/costera. Avisar apenas esté listo.</p>` : ""}<div class="form-actions"><button class="button button-soft" data-action="close-modal">Cerrar</button><button class="button button-primary" data-action="whatsapp" data-id="${esc(order.id)}">WhatsApp</button></div>`);
+  }
+  function showSaleDetail(id) {
+    const sale = state.sales.find(item => item.id === id);
+    if (!sale) return;
+    const items = sale.items.map(item => `<tr><td>${esc(item.name)} × ${item.quantity}</td><td>${money(item.price * item.quantity)}</td></tr>`).join("");
+    openModal("Detalle de venta", `<p class="portal-intro">${dateTime(sale.date)} · ${esc(sale.paymentMethod)}${sale.voided ? " · ANULADA" : ""}</p><div class="table-wrap"><table><thead><tr><th>Ítem</th><th>Subtotal</th></tr></thead><tbody>${items}</tbody></table></div><div class="total-box"><span>Total ${sale.clientId ? `· ${esc((state.clients.find(c => c.id === sale.clientId) || {}).name || "Cliente")}` : "· Cliente de paso"}</span><strong>${money(sale.total)}</strong></div><div class="form-actions"><button class="button button-soft" data-action="close-modal">Cerrar</button></div>`, true);
+  }
+  function clientOptions() { return `<option value="">Cliente nuevo…</option>${state.clients.map(client => `<option value="${esc(client.id)}">${esc(client.name)} · ${esc(client.sector)}</option>`).join("")}`; }
+  function openOrderModal() {
+    const nextId = state.nextOrderId || Math.max(1045, ...state.orders.map(order => Number(order.id) + 1));
+    openModal(`Nuevo pedido #${nextId}`, `<form id="order-form">
+      <div class="form-section-title">Datos del cliente</div><div class="form-grid">
+        <div class="form-field full"><label for="order-client">Cliente frecuente (opcional)</label><select id="order-client">${clientOptions()}</select></div>
+        <div class="form-field"><label for="order-name">Nombre y apellido *</label><input id="order-name" required autocomplete="name" placeholder="Nombre completo"></div>
+        <div class="form-field"><label for="order-phone">Teléfono WhatsApp *</label><input id="order-phone" required type="tel" inputmode="tel" placeholder="+56 9 1234 5678"></div>
+        <div class="form-field full"><label for="order-sector">Procedencia / sector</label><select id="order-sector">${SECTORS.map(s => `<option>${s}</option>`).join("")}</select></div>
+      </div>
+      <div class="form-section-title">Prenda y tipo de arreglo</div><div class="form-grid">
+        <div class="form-field"><label for="order-garment">Prenda</label><select id="order-garment">${GARMENTS.map(item => `<option>${item}</option>`).join("")}</select></div>
+        <div class="form-field"><label for="order-fix">Tipo de arreglo</label><select id="order-fix">${FIXES.map(item => `<option value="${esc(item.name)}" data-price="${item.price}">${esc(item.name)}${item.price ? ` (${money(item.price)})` : ""}</option>`).join("")}</select></div>
+        <div class="form-field full"><label for="order-notes">Observaciones de taller</label><textarea id="order-notes" placeholder="Ej. Subir 3 cm, mantener basta original, hilo azul marino"></textarea></div>
+      </div>
+      <div class="form-section-title">Plazos y estado</div><div class="form-grid">
+        <div class="form-field"><label for="order-due">Fecha de entrega comprometida</label><input id="order-due" type="date" required value="${localDate(3)}"><div class="quick-pills"><button class="quick-pill" type="button" data-date-offset="0">Hoy tarde</button><button class="quick-pill" type="button" data-date-offset="1">Mañana</button><button class="quick-pill" type="button" data-date-offset="3">En 3 días</button><button class="quick-pill" type="button" data-date-offset="7">Próxima semana</button></div></div>
+        <div class="form-field"><label for="order-status">Estado inicial</label><select id="order-status">${ORDER_STATES.slice(0, 3).map((s, i) => `<option ${i === 0 ? "selected" : ""}>${s}</option>`).join("")}</select><div class="check-field"><input id="order-travel" type="checkbox"><label for="order-travel">Cliente viaja desde zona rural/costera — avisar apenas esté listo</label></div></div>
+      </div>
+      <div class="form-section-title">Cobro y abono en CLP</div><div class="form-grid">
+        <div class="form-field"><label for="order-total">Valor total del arreglo</label><input id="order-total" type="number" min="0" step="1" value="3500" required></div>
+        <div class="form-field"><label for="order-deposit">Abono inicial</label><input id="order-deposit" type="number" min="0" step="1" value="0" required><div class="quick-pills"><button class="quick-pill" type="button" data-deposit="0">Paga al retirar</button><button class="quick-pill" type="button" data-deposit="50">50%</button><button class="quick-pill" type="button" data-deposit="100">100% pagado</button></div></div>
+        <div class="form-field"><label>Saldo pendiente</label><div class="balance-field" id="order-balance">${money(3500)}</div></div>
+        <div class="form-field"><label for="order-payment">Medio de pago del abono</label><select id="order-payment"><option>Efectivo</option><option>Transferencia</option></select></div>
+      </div><div class="form-actions"><button class="button button-soft" type="button" data-action="close-modal">Cancelar</button><button class="button button-primary" type="submit">Guardar pedido</button></div></form>`);
+  }
+  function updateOrderBalance() {
+    const total = Number(document.getElementById("order-total")?.value || 0);
+    const deposit = Number(document.getElementById("order-deposit")?.value || 0);
+    const balance = document.getElementById("order-balance");
+    if (balance) balance.textContent = money(Math.max(total - deposit, 0));
+  }
+  function saveOrder(form) {
+    const name = document.getElementById("order-name").value.trim();
+    const phone = document.getElementById("order-phone").value.replace(/\D/g, "");
+    const total = Number(document.getElementById("order-total").value);
+    const deposit = Number(document.getElementById("order-deposit").value);
+    if (!name || phone.length < 8 || !Number.isFinite(total) || total < 0 || !Number.isFinite(deposit) || deposit < 0 || deposit > total) {
+      notify("Revisa nombre, teléfono y montos. El abono no puede superar el total.", true); return;
+    }
+    if (deposit > 0 && !state.cash.open) {
+      notify("Abre la caja antes de registrar un abono.", true);
+      return;
+    }
+    const selectedClient = document.getElementById("order-client").value;
+    let client = selectedClient ? state.clients.find(item => item.id === selectedClient) : null;
+    if (client) {
+      client.name = name;
+      client.phone = phone.startsWith("56") ? phone : `56${phone}`;
+      client.sector = document.getElementById("order-sector").value;
+    } else {
+      client = { id: `c-${Date.now()}`, name, phone: phone.startsWith("56") ? phone : `56${phone}`, sector: document.getElementById("order-sector").value };
+      state.clients.push(client);
+    }
+    const id = String(state.nextOrderId || 1045);
+    const order = {
+      id, clientId: client.id, garment: document.getElementById("order-garment").value,
+      fix: document.getElementById("order-fix").value, status: document.getElementById("order-status").value,
+      total, deposit, paymentMethod: document.getElementById("order-payment").value,
+      notes: document.getElementById("order-notes").value.trim(), date: new Date().toISOString(),
+      dueDate: document.getElementById("order-due").value, travelNotice: document.getElementById("order-travel").checked
+    };
+    state.nextOrderId = Number(id) + 1;
+    state.orders.push(order);
+    if (deposit > 0) state.movements.push({ id: `m-${Date.now()}`, date: new Date().toISOString(), type: "Abono", description: `Abono pedido #${id}`, amount: deposit, method: order.paymentMethod });
+    saveState(); closeModal(); changeView("dashboard");
+    openModal(`Pedido #${id} guardado`, `<p class="portal-intro">El pedido quedó registrado. Puedes enviar ahora el comprobante y los detalles por WhatsApp.</p><div class="notice">Saldo pendiente: <strong>${money(total - deposit)}</strong> · Entrega ${formatDate(order.dueDate)}</div><div class="form-actions" style="margin-top:16px"><button class="button button-soft" data-action="close-modal">Listo</button><button class="button button-primary" data-action="whatsapp" data-id="${id}">Enviar por WhatsApp</button></div>`, true);
+    notify(`Pedido #${id} guardado correctamente.`);
+  }
+  function itemOptions() {
+    return `<option value="">Elige un producto…</option>${CATALOG.map((item, index) => `<option value="${index}" data-price="${item.price}" data-stock="${item.stockId || ""}">${esc(item.name)} (${money(item.price)})</option>`).join("")}<option value="manual">Ítem libre / manual</option>`;
+  }
+  function saleItemRow() {
+    return `<div class="sale-item"><div class="form-field"><label>Ítem</label><select class="sale-product" required>${itemOptions()}</select><input class="sale-manual-name" placeholder="Descripción" hidden></div><div class="form-field"><label>Cantidad</label><input class="sale-quantity" type="number" min="1" step="1" value="1" required></div><div class="form-field price-field"><label>Precio</label><input class="sale-price" type="number" min="0" step="1" value="0" required></div><button class="remove-item" type="button" data-action="remove-sale-item" aria-label="Quitar ítem">×</button></div>`;
+  }
+  function openSaleModal() {
+    if (!state.cash.open) {
+      notify("Abre la caja antes de registrar una venta.", true);
+      return;
+    }
+    openModal("Nueva venta de mesón", `<form id="sale-form"><div class="form-section-title">Productos</div><div class="sale-items" id="sale-items">${saleItemRow()}</div><button class="button button-soft button-small" type="button" data-action="add-sale-item">+ Agregar otro ítem</button>
+      <div class="total-box"><span>Total a pagar</span><strong id="sale-total">${money(0)}</strong></div>
+      <div class="form-grid">
+        <div class="form-field"><label for="sale-method">Medio de pago</label><select id="sale-method"><option>Efectivo</option><option>Transferencia</option></select></div>
+        <div class="form-field"><label for="sale-client">Cliente asociado (opcional)</label><select id="sale-client"><option value="">Venta de mesón (Cliente de paso)</option>${state.clients.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("")}</select></div>
+        <div class="form-field full" id="cash-change-fields"><label for="sale-paid">Cliente paga con ($ CLP)</label><input id="sale-paid" type="number" min="0" step="1" value="0"><div class="quick-pills"><button class="quick-pill" type="button" data-paid="5000">$5.000</button><button class="quick-pill" type="button" data-paid="10000">$10.000</button><button class="quick-pill" type="button" data-paid="20000">$20.000</button><button class="quick-pill" type="button" data-paid="exact">Monto exacto</button></div><small class="change-note" id="sale-change">Vuelto a entregar: ${money(0)}</small></div>
+      </div><div class="form-actions"><button class="button button-soft" type="button" data-action="close-modal">Cancelar</button><button class="button button-primary" type="submit">Guardar venta</button></div></form>`);
+    updateSaleTotals();
+  }
+  function updateSaleRow(row, fromSelect = false) {
+    const select = row.querySelector(".sale-product");
+    const option = select.options[select.selectedIndex];
+    const manual = select.value === "manual";
+    const manualInput = row.querySelector(".sale-manual-name");
+    manualInput.hidden = !manual;
+    manualInput.required = manual;
+    if (fromSelect) row.querySelector(".sale-price").value = option?.dataset.price || 0;
+    row.dataset.stockId = option?.dataset.stock || "";
+    updateSaleTotals();
+  }
+  function updateSaleTotals() {
+    const rows = [...document.querySelectorAll(".sale-item")];
+    const total = rows.reduce((sum, row) => sum + Math.max(0, Number(row.querySelector(".sale-price").value) || 0) * Math.max(1, Number(row.querySelector(".sale-quantity").value) || 1), 0);
+    const totalEl = document.getElementById("sale-total");
+    if (totalEl) totalEl.textContent = money(total);
+    const paid = Number(document.getElementById("sale-paid")?.value || 0);
+    const change = document.getElementById("sale-change");
+    if (change) change.textContent = `Vuelto a entregar: ${money(Math.max(0, paid - total))}${paid < total && paid > 0 ? " · Falta completar el pago" : ""}`;
+  }
+  function saveSale(form) {
+    if (!state.cash.open) {
+      notify("Abre la caja antes de registrar una venta.", true);
+      return;
+    }
+    const rows = [...form.querySelectorAll(".sale-item")];
+    const items = rows.map(row => {
+      const select = row.querySelector(".sale-product");
+      const option = select.options[select.selectedIndex];
+      const catalogItem = select.value !== "manual" && select.value !== "" ? CATALOG[Number(select.value)] : null;
+      return {
+        name: select.value === "manual" ? row.querySelector(".sale-manual-name").value.trim() : catalogItem?.name || "",
+        quantity: Number(row.querySelector(".sale-quantity").value),
+        price: Number(row.querySelector(".sale-price").value),
+        stockId: catalogItem?.stockId || ""
+      };
+    });
+    const total = items.reduce((sum, item) => sum + item.quantity * item.price, 0);
+    const method = document.getElementById("sale-method").value;
+    const paid = Number(document.getElementById("sale-paid").value || 0);
+    if (!items.length || items.some(item => !item.name || !Number.isInteger(item.quantity) || item.quantity < 1 || !Number.isFinite(item.price) || item.price < 0) || total <= 0 || (method === "Efectivo" && paid < total)) {
+      notify(method === "Efectivo" && paid < total ? "El monto recibido no alcanza para cubrir la venta." : "Completa los ítems, cantidades y precios para guardar.", true); return;
+    }
+    items.forEach(item => {
+      if (item.stockId) {
+        const stockItem = state.stock.find(s => s.id === item.stockId);
+        if (stockItem) stockItem.quantity = Math.max(0, stockItem.quantity - item.quantity);
+      }
+    });
+    const sale = { id: `v-${Date.now()}`, date: new Date().toISOString(), items: items.map(({ name, quantity, price, stockId }) => ({ name, quantity, price, stockId })), total, paymentMethod: method, clientId: document.getElementById("sale-client").value };
+    state.sales.push(sale);
+    state.movements.push({ id: `m-${Date.now()}`, date: sale.date, type: "Venta", description: items.map(item => item.name).join(", "), amount: total, method });
+    saveState(); closeModal(); render(); notify(`Venta registrada por ${money(total)}.`);
+  }
+  function openExpenseModal() {
+    if (!state.cash.open) {
+      notify("Abre la caja antes de registrar un egreso.", true);
+      return;
+    }
+    openModal("Registrar egreso menor", `<form id="expense-form"><p class="portal-intro">Registra una compra de insumos u otro gasto pagado desde la caja.</p><div class="form-grid"><div class="form-field full"><label for="expense-desc">Detalle del egreso *</label><input id="expense-desc" required placeholder="Ej. Compra de hilos y cierres"></div><div class="form-field"><label for="expense-amount">Monto ($ CLP) *</label><input id="expense-amount" type="number" min="1" step="1" required></div><div class="form-field"><label for="expense-method">Medio de pago</label><select id="expense-method"><option>Efectivo</option><option>Transferencia</option></select></div></div><div class="form-actions"><button class="button button-soft" type="button" data-action="close-modal">Cancelar</button><button class="button button-primary" type="submit">Guardar egreso</button></div></form>`, true);
+  }
+  function openToggleCashModal() {
+    if (state.cash.open) {
+      const expected = cashTotal();
+      openModal("Cierre y arqueo de caja", `<form id="close-cash-form"><p class="portal-intro">Cuenta el efectivo del cajón y compáralo con los movimientos registrados hoy.</p><div class="total-box"><span>Efectivo esperado</span><strong>${money(expected)}</strong></div><div class="form-field"><label for="cash-counted">Efectivo contado ($ CLP)</label><input id="cash-counted" type="number" min="0" step="1" value="${expected}" required></div><div class="balance-field cash-difference" id="cash-difference" data-expected="${expected}">Caja cuadrada: ${money(0)} de diferencia.</div><p class="portal-intro">La diferencia quedará guardada junto al cierre.</p><div class="form-actions"><button class="button button-soft" type="button" data-action="close-modal">Volver</button><button class="button button-primary" type="submit">Confirmar cierre</button></div></form>`, true);
+    } else {
+      const suggestedOpening = hasCashCountToday() ? state.cash.closingAmount : 20000;
+      openModal("Abrir caja", `<form id="open-cash-form"><p class="portal-intro">Cuenta el efectivo inicial que dejarás en la caja para empezar la jornada.</p><div class="form-field"><label for="opening-amount">Fondo inicial ($ CLP)</label><input id="opening-amount" type="number" min="0" step="1" value="${suggestedOpening}" required></div><div class="notice section-spacer">Las ventas y abonos en efectivo se sumarán a este fondo. Las transferencias se mostrarán por separado.</div><div class="form-actions"><button class="button button-soft" type="button" data-action="close-modal">Cancelar</button><button class="button button-primary" type="submit">Abrir caja</button></div></form>`, true);
+    }
+  }
+  function updateCashDifference() {
+    const input = document.getElementById("cash-counted");
+    const output = document.getElementById("cash-difference");
+    if (!input || !output) return;
+    const difference = Number(input.value) - Number(output.dataset.expected);
+    if (difference === 0) output.textContent = "Caja cuadrada: no hay diferencia.";
+    else if (difference > 0) output.textContent = `Sobra ${money(difference)} respecto del efectivo esperado.`;
+    else output.textContent = `Faltan ${money(Math.abs(difference))} respecto del efectivo esperado.`;
+  }
+  function collectBalance(id) {
+    if (!state.cash.open) {
+      notify("Abre la caja antes de registrar un pago.", true);
+      return;
+    }
+    const order = state.orders.find(item => String(item.id) === String(id));
+    if (!order) return;
+    const balance = order.total - order.deposit;
+    if (balance <= 0) { notify("Este pedido ya está pagado."); return; }
+    openModal(`Cobrar pedido #${order.id}`, `<form id="collect-form" data-id="${esc(order.id)}"><p class="portal-intro">${esc(clientOf(order).name)} · ${esc(order.garment)} · ${esc(order.fix)}</p><div class="total-box"><span>Saldo pendiente</span><strong>${money(balance)}</strong></div><div class="form-grid"><div class="form-field"><label for="collect-amount">Monto recibido</label><input id="collect-amount" type="number" min="${balance}" max="${balance}" value="${balance}" required></div><div class="form-field"><label for="collect-method">Medio de pago</label><select id="collect-method"><option>Efectivo</option><option>Transferencia</option></select></div></div><div class="form-actions"><button class="button button-soft" type="button" data-action="close-modal">Cancelar</button><button class="button button-primary" type="submit">Registrar pago</button></div></form>`, true);
+  }
+  function exportBackup() {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url; link.download = `pinchagest-respaldo-${localDate()}.json`; link.click();
+    URL.revokeObjectURL(url);
+    notify("Respaldo JSON descargado.");
+  }
+  function importBackup(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const imported = JSON.parse(String(reader.result));
+        if (!imported || imported.version !== 1 || !Array.isArray(imported.orders) || !Array.isArray(imported.stock) || !Array.isArray(imported.clients) || !Array.isArray(imported.sales) || !Array.isArray(imported.movements) || !imported.cash) throw new Error("El archivo no contiene un respaldo PinchaGest válido.");
+        state = imported; saveState(); render(); notify("Respaldo importado correctamente.");
+      } catch (error) { console.error(error); notify(`No se pudo importar: ${error.message}`, true); }
+    };
+    reader.onerror = () => notify("No se pudo leer el archivo seleccionado.", true);
+    reader.readAsText(file);
+  }
+  function progressOrder(id) {
+    const order = state.orders.find(item => String(item.id) === String(id));
+    if (!order) return;
+    order.status = ORDER_STATES[(ORDER_STATES.indexOf(order.status) + 1) % ORDER_STATES.length];
+    saveState(); render(); notify(`Pedido #${order.id}: ${order.status}.`);
+  }
+  document.addEventListener("click", event => {
+    const viewLink = event.target.closest("[data-view]");
+    if (viewLink) { event.preventDefault(); changeView(viewLink.dataset.view); return; }
+    const action = event.target.closest("[data-action]");
+    if (!action) return;
+    const privateActions = ["new-order", "new-sale", "new-expense", "toggle-cash", "advance-status", "set-status", "whatsapp", "collect-balance", "order-detail", "sale-detail", "export", "import", "restore", "replenish", "edit-stock", "void-sale"];
+    if (!authUnlocked && privateActions.includes(action.dataset.action)) {
+      pendingView = isProtectedView(activeView) ? activeView : "dashboard";
+      activeView = pendingView;
+      renderAuthGate();
+      return;
+    }
+    switch (action.dataset.action) {
+      case "new-order": openOrderModal(); break;
+      case "new-sale": openSaleModal(); break;
+      case "new-expense": openExpenseModal(); break;
+      case "close-modal": closeModal(); break;
+      case "toggle-cash": openToggleCashModal(); break;
+      case "advance-status": progressOrder(action.dataset.id); break;
+      case "whatsapp": {
+        const order = state.orders.find(item => String(item.id) === String(action.dataset.id));
+        if (order) orderWhatsApp(order);
+        break;
+      }
+      case "collect-balance": collectBalance(action.dataset.id); break;
+      case "order-detail": showOrderDetail(action.dataset.id); break;
+      case "sale-detail": showSaleDetail(action.dataset.id); break;
+      case "export": exportBackup(); break;
+      case "import": document.getElementById("import-file").click(); break;
+      case "logout":
+        try { sessionStorage.removeItem(AUTH_SESSION_KEY); }
+        catch (error) { console.error("No se pudo cerrar la sesión local.", error); }
+        authUnlocked = false;
+        pendingView = "dashboard";
+        activeView = "dashboard";
+        if (location.hash !== "#dashboard") location.hash = "dashboard";
+        renderAuthGate();
+        break;
+      case "restore":
+        if (window.confirm("¿Restaurar los datos demo? Esto reemplazará los datos guardados en este dispositivo.")) {
+          state = structuredClone(SEED); saveState(); render(); notify("Datos demo restaurados.");
+        }
+        break;
+      case "add-sale-item":
+        document.getElementById("sale-items").insertAdjacentHTML("beforeend", saleItemRow());
+        break;
+      case "remove-sale-item":
+        if (document.querySelectorAll(".sale-item").length > 1) action.closest(".sale-item").remove();
+        updateSaleTotals();
+        break;
+      case "replenish": {
+        const item = state.stock.find(stockItem => stockItem.id === action.dataset.id);
+        if (item) openModal(`Reponer ${item.name}`, `<form id="replenish-form" data-id="${esc(item.id)}"><div class="form-grid"><div class="form-field"><label for="replenish-quantity">Cantidad a agregar (${esc(item.unit)})</label><input id="replenish-quantity" type="number" min="1" step="1" value="${Math.max(1, item.minimum - item.quantity)}" required></div><div class="form-field"><label for="replenish-min">Stock mínimo</label><input id="replenish-min" type="number" min="0" step="1" value="${item.minimum}" required></div></div><div class="form-actions"><button class="button button-soft" type="button" data-action="close-modal">Cancelar</button><button class="button button-primary" type="submit">Actualizar stock</button></div></form>`, true);
+        break;
+      }
+      case "edit-stock": {
+        const item = state.stock.find(stockItem => stockItem.id === action.dataset.id);
+        if (item) openModal(`Mínimo: ${item.name}`, `<form id="stock-min-form" data-id="${esc(item.id)}"><div class="form-field"><label for="stock-min">Cantidad mínima (${esc(item.unit)})</label><input id="stock-min" type="number" min="0" step="1" value="${item.minimum}" required></div><div class="form-actions"><button class="button button-soft" type="button" data-action="close-modal">Cancelar</button><button class="button button-primary" type="submit">Guardar mínimo</button></div></form>`, true);
+        break;
+      }
+      case "void-sale": {
+        const sale = state.sales.find(item => item.id === action.dataset.id);
+        if (sale && window.confirm(`¿Anular la venta por ${money(sale.total)}? El movimiento quedará registrado como egreso de caja.`)) {
+          sale.voided = true;
+          sale.items.forEach(saleItem => {
+            const stockItem = state.stock.find(item => item.id === saleItem.stockId);
+            if (stockItem) stockItem.quantity += saleItem.quantity;
+          });
+          state.movements.push({ id: `m-${Date.now()}`, date: new Date().toISOString(), type: "Egreso", description: `Anulación venta ${sale.id}`, amount: sale.total, method: sale.paymentMethod });
+          saveState(); render(); notify("Venta anulada y ajuste registrado en caja.");
+        }
+        break;
+      }
+    }
+    if (action.hasAttribute("data-date-offset")) {
+      document.getElementById("order-due").value = localDate(Number(action.dataset.dateOffset));
+    }
+    if (action.hasAttribute("data-deposit")) {
+      const total = Number(document.getElementById("order-total").value || 0);
+      document.getElementById("order-deposit").value = Math.round(total * Number(action.dataset.deposit) / 100);
+      updateOrderBalance();
+    }
+    if (action.hasAttribute("data-paid")) {
+      const total = [...document.querySelectorAll(".sale-item")].reduce((sum, row) => sum + Number(row.querySelector(".sale-price").value || 0) * Number(row.querySelector(".sale-quantity").value || 1), 0);
+      document.getElementById("sale-paid").value = action.dataset.paid === "exact" ? total : Number(action.dataset.paid);
+      updateSaleTotals();
+    }
+  });
+  document.addEventListener("change", event => {
+    if (event.target.id === "order-client") {
+      const client = state.clients.find(item => item.id === event.target.value);
+      if (client) {
+        document.getElementById("order-name").value = client.name;
+        document.getElementById("order-phone").value = `+${client.phone}`;
+        document.getElementById("order-sector").value = client.sector;
+        document.getElementById("order-travel").checked = client.sector !== "Valdivia Urbano";
+      } else {
+        document.getElementById("order-name").value = "";
+        document.getElementById("order-phone").value = "";
+      }
+    }
+    if (event.target.classList.contains("sale-product")) updateSaleRow(event.target.closest(".sale-item"), true);
+    if (event.target.id === "sale-method") {
+      const fields = document.getElementById("cash-change-fields");
+      fields.hidden = event.target.value !== "Efectivo";
+    }
+    if (event.target.id === "order-fix") {
+      const selected = event.target.options[event.target.selectedIndex];
+      if (Number(selected.dataset.price) > 0) document.getElementById("order-total").value = selected.dataset.price;
+      updateOrderBalance();
+    }
+    if (["order-search", "order-status-filter", "order-sector-filter"].includes(event.target.id)) renderOrdersTable();
+    if (["sales-date-filter", "sales-method-filter"].includes(event.target.id)) renderSalesTable();
+  });
+  document.addEventListener("input", event => {
+    if (["order-total", "order-deposit"].includes(event.target.id)) updateOrderBalance();
+    if (event.target.matches(".sale-price, .sale-quantity") || event.target.id === "sale-paid") updateSaleTotals();
+    if (event.target.id === "cash-counted") updateCashDifference();
+    if (event.target.id === "order-search" || event.target.id === "client-search") {
+      if (event.target.id === "order-search") renderOrdersTable();
+      if (event.target.id === "client-search") {
+        const query = event.target.value.trim().toLowerCase();
+        document.querySelectorAll("[data-client-row]").forEach(row => row.hidden = !row.dataset.search.includes(query));
+      }
+    }
+  });
+  document.addEventListener("change", event => {
+    if (event.target.matches('[data-action="set-status"]')) {
+      const order = state.orders.find(item => String(item.id) === String(event.target.dataset.id));
+      if (order) { order.status = event.target.value; saveState(); renderOrdersTable(); notify(`Pedido #${order.id}: ${order.status}.`); }
+    }
+    if (event.target.id === "import-file") {
+      importBackup(event.target.files[0]); event.target.value = "";
+    }
+  });
+  document.addEventListener("submit", event => {
+    if (event.target.id === "auth-form") { event.preventDefault(); submitAuth(event.target); return; }
+    if (event.target.id === "order-form") { event.preventDefault(); saveOrder(event.target); }
+    if (event.target.id === "sale-form") { event.preventDefault(); saveSale(event.target); }
+    if (event.target.id === "portal-form") {
+      event.preventDefault(); portalOrderId = document.getElementById("portal-id").value.trim();
+      if (portalOrderId) render();
+    }
+    if (event.target.id === "expense-form") {
+      event.preventDefault();
+      if (!state.cash.open) { notify("Abre la caja antes de registrar un egreso.", true); return; }
+      const amount = Number(document.getElementById("expense-amount").value);
+      const description = document.getElementById("expense-desc").value.trim();
+      const method = document.getElementById("expense-method").value;
+      if (!description || !Number.isFinite(amount) || amount <= 0) { notify("Ingresa un detalle y un monto válido.", true); return; }
+      state.movements.push({ id: `m-${Date.now()}`, date: new Date().toISOString(), type: "Egreso", description, amount, method });
+      saveState(); closeModal(); render(); notify("Egreso registrado.");
+    }
+    if (event.target.id === "close-cash-form") {
+      event.preventDefault();
+      if (!state.cash.open) { notify("La caja ya está cerrada.", true); closeModal(); render(); return; }
+      const countedAmount = Number(document.getElementById("cash-counted").value);
+      if (!Number.isFinite(countedAmount) || countedAmount < 0) { notify("Ingresa un monto contado válido.", true); return; }
+      const expectedAmount = cashTotal();
+      const difference = countedAmount - expectedAmount;
+      const closedAt = new Date().toISOString();
+      state.cash = { ...state.cash, open: false, closedAt, expectedAmount, closingAmount: countedAmount, closingDifference: difference };
+      const note = difference === 0 ? "Caja cuadrada" : `${difference > 0 ? "Sobrante" : "Faltante"} ${money(Math.abs(difference))}`;
+      state.movements.push({ id: `m-${Date.now()}`, date: closedAt, type: "Cierre", description: `Arqueo de cierre · ${note}`, amount: countedAmount, method: "Efectivo" });
+      saveState(); closeModal(); render(); notify(`Caja cerrada. ${note}.`);
+    }
+    if (event.target.id === "open-cash-form") {
+      event.preventDefault();
+      state.cash = { open: true, openingAmount: Number(document.getElementById("opening-amount").value), openedAt: new Date().toISOString() };
+      state.movements.push({ id: `m-${Date.now()}`, date: new Date().toISOString(), type: "Apertura", description: "Fondo inicial", amount: state.cash.openingAmount, method: "Efectivo" });
+      saveState(); closeModal(); render(); notify("Caja abierta.");
+    }
+    if (event.target.id === "collect-form") {
+      event.preventDefault();
+      const order = state.orders.find(item => String(item.id) === String(event.target.dataset.id));
+      if (!order) return;
+      const amount = Number(document.getElementById("collect-amount").value);
+      const balance = order.total - order.deposit;
+      if (amount !== balance) { notify(`El monto debe coincidir con el saldo: ${money(balance)}.`, true); return; }
+      const method = document.getElementById("collect-method").value;
+      order.deposit += amount;
+      if (order.status === "Lista para retirar") order.status = "Entregada";
+      state.movements.push({ id: `m-${Date.now()}`, date: new Date().toISOString(), type: "Abono", description: `Saldo pedido #${order.id}`, amount, method });
+      saveState(); closeModal(); render(); notify(`Pago registrado. Pedido #${order.id} actualizado.`);
+    }
+    if (event.target.id === "replenish-form") {
+      event.preventDefault();
+      const item = state.stock.find(stockItem => stockItem.id === event.target.dataset.id);
+      if (!item) return;
+      item.quantity += Number(document.getElementById("replenish-quantity").value);
+      item.minimum = Number(document.getElementById("replenish-min").value);
+      saveState(); closeModal(); render(); notify(`${item.name}: stock actualizado.`);
+    }
+    if (event.target.id === "stock-min-form") {
+      event.preventDefault();
+      const item = state.stock.find(stockItem => stockItem.id === event.target.dataset.id);
+      if (!item) return;
+      item.minimum = Number(document.getElementById("stock-min").value);
+      saveState(); closeModal(); render(); notify("Stock mínimo actualizado.");
+    }
+  });
+  document.getElementById("menu-button").addEventListener("click", () => {
+    document.body.classList.toggle("menu-open");
+    document.getElementById("menu-button").setAttribute("aria-expanded", String(document.body.classList.contains("menu-open")));
+  });
+  document.getElementById("scrim").addEventListener("click", () => {
+    document.body.classList.remove("menu-open");
+    document.getElementById("menu-button").setAttribute("aria-expanded", "false");
+  });
+  window.addEventListener("hashchange", () => {
+    const hash = location.hash.slice(1);
+    if (hash && hash !== activeView && ["dashboard", "home", "orders", "sales", "cash", "stock", "clients", "portal"].includes(hash)) changeView(hash);
+  });
+  const initialView = location.hash.slice(1);
+  if (["dashboard", "home", "orders", "sales", "cash", "stock", "clients", "portal"].includes(initialView)) activeView = initialView;
+  pendingView = isProtectedView(activeView) ? activeView : "dashboard";
+  render();
+})();
+
+  </script>
+</body>
+</html>
