@@ -100,7 +100,7 @@ h1 { margin: 8px 0 5px; font-size: clamp(24px, 3vw, 31px); letter-spacing: -.055
 .button-outline { color: #fff; background: transparent; border: 2px solid rgba(255,255,255,.58); box-shadow: 0 4px 0 rgba(17,10,20,.4); }
 .button-small { min-height: 32px; padding: 7px 10px; border-radius: 8px; font-size: 10px; }
 .icon-button { border: 0; width: 38px; height: 38px; background: #fff; color: var(--color-ciruela); border-radius: 11px; box-shadow: 0 3px 12px rgba(57,38,63,.06); }
-.kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
 .kpi-card { min-height: 112px; padding: 18px 20px; border: 1px solid rgba(57,38,63,.07); border-radius: 19px; box-shadow: inset 3px 3px 8px rgba(255,255,255,.65), inset -4px -5px 9px rgba(57,38,63,.05), 5px 6px 0 rgba(57,38,63,.1); transition: transform .28s var(--ease), box-shadow .28s var(--ease); animation: card-pop .65s var(--ease) both; }
 .kpi-card:nth-child(2) { animation-delay: .08s; }
 .kpi-card:nth-child(3) { animation-delay: .16s; }
@@ -109,6 +109,7 @@ h1 { margin: 8px 0 5px; font-size: clamp(24px, 3vw, 31px); letter-spacing: -.055
 .kpi-card.cash { background: #f7edc9; }
 .kpi-card.orders-kpi { background: var(--lavender); }
 .kpi-card.stock-kpi { background: var(--peach); }
+.kpi-card.transfer-kpi { background: var(--color-salvia); }
 .kpi-label { font-size: 9px; font-weight: 800; color: #756d72; letter-spacing: .1em; }
 .kpi-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 12px; }
 .kpi-value { color: var(--color-ciruela); font: 800 25px/1 Manrope, sans-serif; letter-spacing: -.04em; }
@@ -150,6 +151,7 @@ tbody tr:last-child td { border-bottom: 0; }
 .inline-select { max-width: 145px; min-height: 31px; border: 1px solid var(--line); border-radius: 8px; padding: 0 6px; background: #fff; color: var(--color-ciruela); font-size: 9px; }
 .empty-state { padding: 32px 16px; color: var(--muted); text-align: center; font-size: 12px; }
 .summary-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; margin-bottom: 15px; }
+.sales-summary { grid-template-columns: repeat(4, 1fr); }
 .summary-tile { padding: 14px; border-radius: 13px; background: #fff; }
 .summary-tile span { display: block; color: var(--muted); font-size: 9px; }
 .summary-tile strong { display: block; margin-top: 7px; color: var(--color-ciruela); font: 800 18px Manrope, sans-serif; }
@@ -222,6 +224,7 @@ tbody tr:last-child td { border-bottom: 0; }
 .form-section-title { margin: 2px 0 11px; color: var(--color-ciruela); font-size: 11px; font-weight: 800; }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-bottom: 17px; }
 .form-field { display: grid; gap: 6px; min-width: 0; }
+.form-field[hidden] { display: none; }
 .form-field.full { grid-column: 1 / -1; }
 .form-field label { color: #655b66; font-size: 10px; font-weight: 700; }
 .form-field input, .form-field select, .form-field textarea { width: 100%; min-height: 39px; padding: 9px 10px; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 9px; font-size: 11px; }
@@ -258,7 +261,7 @@ tbody tr:last-child td { border-bottom: 0; }
 
 @media (max-width: 950px) {
   .app-shell { padding: 0; gap: 0; }
-  .kpi-grid { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .sidebar { position: fixed; z-index: 12; top: 10px; bottom: 10px; left: 10px; height: auto; min-height: 0; width: min(270px, calc(100vw - 60px)); transform: translateX(calc(-100% - 18px)); transition: transform .28s var(--ease); }
   body.menu-open .sidebar { transform: translateX(0); }
   .scrim { display: block; position: fixed; z-index: 11; inset: 0; border: 0; background: rgba(31,20,34,.4); opacity: 0; pointer-events: none; transition: opacity .25s var(--ease); }
@@ -283,6 +286,7 @@ tbody tr:last-child td { border-bottom: 0; }
   .quick-panel { min-height: 155px; }
   .summary-strip { grid-template-columns: 1fr 1fr; }
   .summary-tile:last-child { grid-column: 1 / -1; }
+  .sales-summary .summary-tile:last-child { grid-column: auto; }
   .cash-summary .summary-tile:last-child { grid-column: 1 / -1; }
   .stock-grid, .feature-grid { grid-template-columns: repeat(2, 1fr); }
   .hero { grid-template-columns: 1fr; padding: 27px 22px; gap: 21px; }
@@ -528,11 +532,25 @@ tbody tr:last-child td { border-bottom: 0; }
     return new Date(value).toLocaleString("es-CL", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
   }
   function clientOf(order) { return state.clients.find(client => client.id === order.clientId) || { name: "Cliente", phone: "", sector: "" }; }
+  function orderPaymentSummary(order) {
+    const descriptions = [`Abono pedido #${order.id}`, `Saldo pedido #${order.id}`];
+    const payments = state.movements.filter(item => item.type === "Abono" && descriptions.includes(item.description));
+    const totals = payments.reduce((result, item) => {
+      const method = item.method || order.paymentMethod || "Efectivo";
+      result.set(method, (result.get(method) || 0) + item.amount);
+      return result;
+    }, new Map());
+    if (!payments.length && Number(order.deposit) > 0) totals.set(order.paymentMethod || "Efectivo", Number(order.deposit));
+    return totals.size ? [...totals].map(([method, amount]) => `${money(amount)} ${esc(method)}`).join(" · ") : "Sin abonos";
+  }
   function orderStatusClass(status) {
     return status === "En proceso" ? "proceso" : status === "Lista para retirar" ? "retirar" : status === "Entregada" ? "entregada" : "ingresada";
   }
   function activeOrders() { return state.orders.filter(order => order.status !== "Entregada"); }
   function todayMovements() { return state.movements.filter(item => dateKey(new Date(item.date)) === localDate()); }
+  function transferIncomeToday() {
+    return todayMovements().filter(item => ["Abono", "Venta"].includes(item.type) && item.method === "Transferencia").reduce((sum, item) => sum + item.amount, 0);
+  }
   function cashSessionMovements() {
     const openedAt = state.cash.openedAt ? new Date(state.cash.openedAt) : null;
     return openedAt && dateKey(openedAt) === localDate()
@@ -580,6 +598,7 @@ tbody tr:last-child td { border-bottom: 0; }
     return `${viewHeader("PANEL DE CONTROL", "Hola, Marlén", "Este es el resumen de tu local.", cashPill())}
       <section class="kpi-grid" aria-label="Resumen del día">
         <article class="kpi-card cash"><div class="kpi-label">CAJA DEL DÍA</div><div class="kpi-row"><strong class="kpi-value">${displayedCashTotal() ? money(displayedCashTotal()) : "$ —"}</strong><span class="kpi-note">${hasCashCountToday() ? "Efectivo contado" : "Efectivo estimado"}</span></div></article>
+        <article class="kpi-card transfer-kpi"><div class="kpi-label">TRANSFERENCIAS HOY</div><div class="kpi-row"><strong class="kpi-value">${money(transferIncomeToday())}</strong><span class="kpi-note">Ventas y abonos</span></div></article>
         <article class="kpi-card orders-kpi"><div class="kpi-label">PEDIDOS ACTIVOS</div><div class="kpi-row"><strong class="kpi-value">${String(activeOrders().length).padStart(2, "0")}</strong><span class="kpi-note">Seguimiento de prendas</span></div></article>
         <article class="kpi-card stock-kpi"><div class="kpi-label">ALERTAS DE STOCK</div><div class="kpi-row"><strong class="kpi-value">${String(state.stock.filter(item => item.quantity < item.minimum).length).padStart(2, "0")}</strong><span class="kpi-note">Productos por revisar</span></div></article>
       </section>
@@ -618,15 +637,15 @@ tbody tr:last-child td { border-bottom: 0; }
     });
     const container = document.getElementById("orders-table");
     if (!container) return;
-    container.innerHTML = rows.length ? `<div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente / sector</th><th>Arreglo</th><th>Estado</th><th>Saldo</th><th>Entrega</th><th>Acciones</th></tr></thead><tbody>${rows.map(order => {
+    container.innerHTML = rows.length ? `<div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente / sector</th><th>Arreglo</th><th>Estado</th><th>Saldo / abonos</th><th>Entrega</th><th>Acciones</th></tr></thead><tbody>${rows.map(order => {
       const client = clientOf(order);
-      return `<tr><td><span class="cell-strong">#${esc(order.id)}</span><span class="cell-muted">${formatDate(order.date)}</span></td><td><span class="cell-strong">${esc(client.name)}</span><span class="cell-muted">${esc(client.sector)}</span></td><td><span class="cell-strong">${esc(order.garment)}</span><span class="cell-muted">${esc(order.fix)}</span></td><td><select class="inline-select" data-action="set-status" data-id="${esc(order.id)}" aria-label="Estado pedido ${esc(order.id)}">${ORDER_STATES.map(value => `<option ${value === order.status ? "selected" : ""}>${value}</option>`).join("")}</select></td><td>${money(order.total - order.deposit)}</td><td>${formatDate(order.dueDate)}</td><td><div class="table-actions"><button class="button button-soft button-small" data-action="order-detail" data-id="${esc(order.id)}">Detalle</button><button class="button button-soft button-small" data-action="whatsapp" data-id="${esc(order.id)}">WhatsApp</button>${order.status !== "Entregada" && order.total > order.deposit ? `<button class="button button-dark button-small" data-action="collect-balance" data-id="${esc(order.id)}">Cobrar</button>` : ""}</div></td></tr>`;
+      return `<tr><td><span class="cell-strong">#${esc(order.id)}</span><span class="cell-muted">${formatDate(order.date)}</span></td><td><span class="cell-strong">${esc(client.name)}</span><span class="cell-muted">${esc(client.sector)}</span></td><td><span class="cell-strong">${esc(order.garment)}</span><span class="cell-muted">${esc(order.fix)}</span></td><td><select class="inline-select" data-action="set-status" data-id="${esc(order.id)}" aria-label="Estado pedido ${esc(order.id)}">${ORDER_STATES.map(value => `<option ${value === order.status ? "selected" : ""}>${value}</option>`).join("")}</select></td><td><span class="cell-strong">Saldo ${money(order.total - order.deposit)}</span><span class="cell-muted">Abonos: ${orderPaymentSummary(order)}</span></td><td>${formatDate(order.dueDate)}</td><td><div class="table-actions"><button class="button button-soft button-small" data-action="order-detail" data-id="${esc(order.id)}">Detalle</button><button class="button button-soft button-small" data-action="whatsapp" data-id="${esc(order.id)}">WhatsApp</button>${order.status !== "Entregada" && order.total > order.deposit ? `<button class="button button-dark button-small" data-action="collect-balance" data-id="${esc(order.id)}">Cobrar</button>` : ""}</div></td></tr>`;
     }).join("")}</tbody></table></div>` : `<div class="empty-state">No encontramos pedidos con esos filtros.</div>`;
   }
   function salesView() {
     return `${viewHeader("MESÓN", "Ventas", "Historial de ventas directas y resumen de caja.", `<button class="button button-primary" data-action="new-sale">+ Nueva venta</button>`)}
       <div class="toolbar"><input class="field-control" id="sales-date-filter" type="date" aria-label="Filtrar ventas por fecha" value="${localDate()}"><select class="field-control" id="sales-method-filter" aria-label="Filtrar por medio de pago"><option>Todos los medios</option><option>Efectivo</option><option>Transferencia</option></select></div>
-      <div class="summary-strip" id="sales-summary"></div><section class="panel"><div id="sales-table"></div></section>`;
+      <div class="summary-strip sales-summary" id="sales-summary"></div><section class="panel"><div id="sales-table"></div></section>`;
   }
   function renderSalesTable() {
     const date = document.getElementById("sales-date-filter")?.value || "";
@@ -634,7 +653,7 @@ tbody tr:last-child td { border-bottom: 0; }
     const rows = [...state.sales].filter(sale => (!date || dateKey(new Date(sale.date)) === date) && (method === "Todos los medios" || sale.paymentMethod === method)).sort((a, b) => b.date.localeCompare(a.date));
     const total = rows.filter(sale => !sale.voided).reduce((sum, sale) => sum + sale.total, 0);
     const summary = document.getElementById("sales-summary");
-    if (summary) summary.innerHTML = `<div class="summary-tile"><span>Ventas del filtro</span><strong>${rows.filter(sale => !sale.voided).length}</strong></div><div class="summary-tile"><span>Total vendido</span><strong>${money(total)}</strong></div><div class="summary-tile"><span>Efectivo recibido</span><strong>${money(rows.filter(s => !s.voided && s.paymentMethod === "Efectivo").reduce((n, s) => n + s.total, 0))}</strong></div>`;
+    if (summary) summary.innerHTML = `<div class="summary-tile"><span>Ventas del filtro</span><strong>${rows.filter(sale => !sale.voided).length}</strong></div><div class="summary-tile"><span>Total vendido</span><strong>${money(total)}</strong></div><div class="summary-tile"><span>Efectivo recibido</span><strong>${money(rows.filter(sale => !sale.voided && sale.paymentMethod === "Efectivo").reduce((sum, sale) => sum + sale.total, 0))}</strong></div><div class="summary-tile"><span>Transferencias recibidas</span><strong>${money(rows.filter(sale => !sale.voided && sale.paymentMethod === "Transferencia").reduce((sum, sale) => sum + sale.total, 0))}</strong></div>`;
     const container = document.getElementById("sales-table");
     if (!container) return;
     container.innerHTML = rows.length ? `<div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Detalle</th><th>Cliente</th><th>Medio</th><th>Total</th><th></th></tr></thead><tbody>${rows.map(sale => `<tr><td>${dateTime(sale.date)}</td><td>${sale.items.map(item => `${esc(item.name)} × ${item.quantity}`).join("<br>")}${sale.voided ? `<span class="cell-muted">ANULADA</span>` : ""}</td><td>${sale.clientId ? esc((state.clients.find(c => c.id === sale.clientId) || {}).name || "Cliente") : "Cliente de paso"}</td><td>${esc(sale.paymentMethod)}</td><td><span class="cell-strong">${money(sale.total)}</span></td><td><div class="table-actions"><button class="button button-soft button-small" data-action="sale-detail" data-id="${esc(sale.id)}">Detalle</button>${sale.voided ? "" : `<button class="button button-soft button-small" data-action="void-sale" data-id="${esc(sale.id)}">Anular</button>`}</div></td></tr>`).join("")}</tbody></table></div>` : `<div class="empty-state">No hay ventas para los filtros seleccionados.</div>`;
@@ -791,7 +810,7 @@ tbody tr:last-child td { border-bottom: 0; }
     const order = state.orders.find(item => String(item.id) === String(id));
     if (!order) return;
     const client = clientOf(order);
-    openModal(`Detalle pedido #${order.id}`, `<div class="summary-strip"><div class="summary-tile"><span>Estado</span><strong style="font-size:13px">${esc(order.status)}</strong></div><div class="summary-tile"><span>Total</span><strong>${money(order.total)}</strong></div><div class="summary-tile"><span>Saldo pendiente</span><strong>${money(order.total - order.deposit)}</strong></div></div><div class="form-grid"><div class="detail-tile"><small>Cliente</small><strong>${esc(client.name)}</strong></div><div class="detail-tile"><small>Teléfono WhatsApp</small><strong>${esc(client.phone)}</strong></div><div class="detail-tile"><small>Procedencia</small><strong>${esc(client.sector)}</strong></div><div class="detail-tile"><small>Prenda y arreglo</small><strong>${esc(order.garment)} · ${esc(order.fix)}</strong></div><div class="detail-tile"><small>Ingreso / entrega estimada</small><strong>${formatDate(order.date)} · ${formatDate(order.dueDate)}</strong></div><div class="detail-tile"><small>Abono registrado</small><strong>${money(order.deposit)} · ${esc(order.paymentMethod)}</strong></div><div class="detail-tile" style="grid-column:1/-1"><small>Observaciones del taller</small><strong>${esc(order.notes || "Sin observaciones")}</strong></div></div>${order.travelNotice ? `<p class="notice">Cliente viaja desde zona rural/costera. Avisar apenas esté listo.</p>` : ""}<div class="form-actions"><button class="button button-soft" data-action="close-modal">Cerrar</button><button class="button button-primary" data-action="whatsapp" data-id="${esc(order.id)}">WhatsApp</button></div>`);
+    openModal(`Detalle pedido #${order.id}`, `<div class="summary-strip"><div class="summary-tile"><span>Estado</span><strong style="font-size:13px">${esc(order.status)}</strong></div><div class="summary-tile"><span>Total</span><strong>${money(order.total)}</strong></div><div class="summary-tile"><span>Saldo pendiente</span><strong>${money(order.total - order.deposit)}</strong></div></div><div class="form-grid"><div class="detail-tile"><small>Cliente</small><strong>${esc(client.name)}</strong></div><div class="detail-tile"><small>Teléfono WhatsApp</small><strong>${esc(client.phone)}</strong></div><div class="detail-tile"><small>Procedencia</small><strong>${esc(client.sector)}</strong></div><div class="detail-tile"><small>Prenda y arreglo</small><strong>${esc(order.garment)} · ${esc(order.fix)}</strong></div><div class="detail-tile"><small>Ingreso / entrega estimada</small><strong>${formatDate(order.date)} · ${formatDate(order.dueDate)}</strong></div><div class="detail-tile"><small>Abonos y medios de pago</small><strong>${orderPaymentSummary(order)}</strong></div><div class="detail-tile" style="grid-column:1/-1"><small>Observaciones del taller</small><strong>${esc(order.notes || "Sin observaciones")}</strong></div></div>${order.travelNotice ? `<p class="notice">Cliente viaja desde zona rural/costera. Avisar apenas esté listo.</p>` : ""}<div class="form-actions"><button class="button button-soft" data-action="close-modal">Cerrar</button><button class="button button-primary" data-action="whatsapp" data-id="${esc(order.id)}">WhatsApp</button></div>`);
   }
   function showSaleDetail(id) {
     const sale = state.sales.find(item => item.id === id);
@@ -940,7 +959,7 @@ tbody tr:last-child td { border-bottom: 0; }
     const sale = { id: `v-${Date.now()}`, date: new Date().toISOString(), items: items.map(({ name, quantity, price, stockId }) => ({ name, quantity, price, stockId })), total, paymentMethod: method, clientId: document.getElementById("sale-client").value };
     state.sales.push(sale);
     state.movements.push({ id: `m-${Date.now()}`, date: sale.date, type: "Venta", description: items.map(item => item.name).join(", "), amount: total, method });
-    saveState(); closeModal(); render(); notify(`Venta registrada por ${money(total)}.`);
+    saveState(); closeModal(); render(); notify(`Venta registrada por ${money(total)} mediante ${method}.`);
   }
   function openExpenseModal() {
     if (!state.cash.open) {
